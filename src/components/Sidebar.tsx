@@ -2,8 +2,8 @@ import Link from "next/link";
 
 export default function Sidebar() {
   return (
-    <aside className="hidden md:flex flex-col h-screen py-6 bg-[#131b2e] w-64 fixed left-0 top-0 z-50 shadow-xl border-r border-white/5">
-      <div className="px-6 mb-10 flex items-center gap-3">
+    <aside className="hidden md:flex flex-col h-screen py-6 bg-surface-container-low/95 backdrop-blur-3xl w-64 fixed left-0 top-0 z-50 shadow-2xl shadow-black/40 border-r border-white/10 transition-all duration-500">
+      <div className="px-6 mb-10 flex items-center gap-3 group cursor-pointer">
         <div className="w-8 h-8 rounded bg-primary flex items-center justify-center">
           <span className="material-symbols-outlined text-on-primary text-xl" style={{ fontVariationSettings: "'FILL' 1" }}>
             security

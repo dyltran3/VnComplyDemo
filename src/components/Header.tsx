@@ -2,7 +2,7 @@ import Image from "next/image";
 
 export default function Header() {
   return (
-    <header className="fixed top-0 right-0 w-full md:w-[calc(100%-16rem)] h-16 z-40 bg-[#0b1326]/70 backdrop-blur-xl flex justify-between items-center px-8 border-b border-white/5 font-body text-sm">
+    <header className="fixed top-0 right-0 w-full md:w-[calc(100%-16rem)] h-16 z-40 bg-surface/50 backdrop-blur-2xl shadow-xl shadow-black/10 flex justify-between items-center px-8 border-b border-white/10 font-body text-sm transition-all duration-300">
       <div className="flex items-center flex-1 max-w-xl">
         <div className="relative w-full group">
           <span className="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 text-lg">search</span>
