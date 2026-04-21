@@ -54,6 +54,17 @@ export default function D3SystemMetrics({ data, color = "#adc6ff" }: { data: num
       .call(d3.axisLeft(y).tickSize(-width + margin.left + margin.right).tickFormat(() => ""))
       .attr("color", "rgba(255,255,255,0.05)");
 
+    // Create Gradient
+    const gradientId = `gradient-${color.replace("#", "")}`;
+    const defs = svg.append("defs");
+    const gradient = defs.append("linearGradient")
+      .attr("id", gradientId)
+      .attr("x1", "0%").attr("y1", "0%")
+      .attr("x2", "0%").attr("y2", "100%");
+    
+    gradient.append("stop").attr("offset", "0%").attr("stop-color", color).attr("stop-opacity", 0.3);
+    gradient.append("stop").attr("offset", "100%").attr("stop-color", color).attr("stop-opacity", 0);
+
     // Add glowing line
     svg.append("path")
       .datum(data)
@@ -61,7 +72,7 @@ export default function D3SystemMetrics({ data, color = "#adc6ff" }: { data: num
       .attr("stroke", color)
       .attr("stroke-width", 3)
       .attr("d", line)
-      .style("filter", "drop-shadow(0px 4px 6px rgba(0,0,0,0.5))");
+      .style("filter", `drop-shadow(0px 4px 10px ${color}44)`);
 
     // Add area fill
     const area = d3.area<number>()
@@ -72,9 +83,9 @@ export default function D3SystemMetrics({ data, color = "#adc6ff" }: { data: num
 
     svg.append("path")
       .datum(data)
-      .attr("fill", color)
-      .attr("opacity", 0.1)
+      .attr("fill", `url(#${gradientId})`)
       .attr("d", area);
+
 
   }, [data, color]);
 
