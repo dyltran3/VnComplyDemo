@@ -1,34 +1,41 @@
 "use client";
-import { useState } from "react";
+import { useEffect, useState } from "react";
+import { api } from "@/lib/api";
 import { motion } from "framer-motion";
-import { AlertTriangle, CheckCircle, Info, Filter, Download, RefreshCw } from "lucide-react";
-
-const allLogs = [
-  { id: 1, ts: "2026-04-15 20:55:12", actor: "AdMin@Polic", action: "Rule Added: Consent Collection NĐ13/Art.11", level: "info" },
-  { id: 2, ts: "2026-04-15 20:47:01", actor: "System", action: "Engine restart triggered (auto-recovery)", level: "warn" },
-  { id: 3, ts: "2026-04-15 20:30:44", actor: "User01@testmail", action: "Scan completed: https://vn.express.net → Score 68", level: "info" },
-  { id: 4, ts: "2026-04-15 19:15:09", actor: "System", action: "Critical: Scanner timeout on job #5522 (>30s)", level: "error" },
-  { id: 5, ts: "2026-04-15 18:00:00", actor: "AdMin@Polic", action: "Account 'Business@testmail' role changed → Business", level: "info" },
-  { id: 6, ts: "2026-04-15 17:42:55", actor: "System", action: "Daily quota exceeded: 10 000 scans/day limit reached", level: "warn" },
-  { id: 7, ts: "2026-04-15 14:10:22", actor: "Auditor@testmail", action: "Exported compliance report for FinTech VN Corp", level: "info" },
-];
-
-const levelIcon: Record<string, React.ReactNode> = {
-  error: <AlertTriangle size={16} className="text-red-400" />,
-  warn:  <AlertTriangle size={16} className="text-amber-400" />,
-  info:  <CheckCircle  size={16} className="text-[#3cddc7]" />,
-};
+import { AlertTriangle, CheckCircle, Info, Filter, Download, RefreshCw, Loader2 } from "lucide-react";
 
 export default function AuditLogsPage() {
+  const [allLogs, setAllLogs] = useState<any[]>([]);
+  const [loading, setLoading] = useState(true);
   const [filter, setFilter] = useState("all");
-  const [loading, setLoading] = useState(false);
 
-  const refresh = () => {
+  useEffect(() => {
+    fetchLogs();
+  }, []);
+
+  const fetchLogs = async () => {
     setLoading(true);
-    setTimeout(() => setLoading(false), 1000);
+    try {
+      const data = await api.getAuditLogs();
+      setAllLogs(data);
+    } catch (err) {
+      console.error("Failed to fetch logs", err);
+    } finally {
+      setLoading(false);
+    }
   };
 
-  const filtered = filter === "all" ? allLogs : allLogs.filter(l => l.level === filter);
+  const refresh = () => fetchLogs();
+
+  const levelIcon: Record<string, React.ReactNode> = {
+    error: <AlertTriangle size={16} className="text-red-400" />,
+    warn:  <AlertTriangle size={16} className="text-amber-400" />,
+    info:  <CheckCircle  size={16} className="text-[#3cddc7]" />,
+  };
+
+  const filtered = filter === "all" ? allLogs : (allLogs || []).filter(l => l.level === filter);
+
+
 
   return (
     <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="space-y-8">

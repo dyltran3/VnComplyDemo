@@ -1,30 +1,53 @@
-"use client";
-import { useState } from "react";
+import { useEffect, useState } from "react";
+import { api } from "@/lib/api";
 import { motion, AnimatePresence } from "framer-motion";
-import { PlusCircle, Search, Edit2, Trash2, CheckCircle2, X } from "lucide-react";
+import { PlusCircle, Search, Edit2, Trash2, CheckCircle2, X, Loader2 } from "lucide-react";
 
 export default function RuleManagement() {
-  const [rules, setRules] = useState([
-    { id: "SA-02", name: "Data Localization (NĐ 13)", status: "active", article: "Article 26" },
-    { id: "SA-03", name: "Consent Collection requirement", status: "active", article: "Article 11" },
-    { id: "SA-04", name: "DPIA Submission", status: "inactive", article: "Article 24" }
-  ]);
-  
+  const [rules, setRules] = useState<any[]>([]);
+  const [loading, setLoading] = useState(true);
   const [isAdding, setIsAdding] = useState(false);
-  const [newRule, setNewRule] = useState({ name: "", article: "" });
+  const [newRule, setNewRule] = useState({ description: "", law_ref: "", severity: "MEDIUM", category: "privacy" });
 
-  const handleAddRule = (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!newRule.name || !newRule.article) return;
-    
-    setRules([{ id: `SA-0${Math.floor(Math.random()*100)}`, name: newRule.name, article: newRule.article, status: 'active' }, ...rules]);
-    setIsAdding(false);
-    setNewRule({ name: "", article: "" });
+  useEffect(() => {
+    fetchRules();
+  }, []);
+
+  const fetchRules = async () => {
+    try {
+      const data = await api.listLegalRules();
+      setRules(data);
+    } catch (error) {
+      console.error("Failed to fetch rules", error);
+    } finally {
+      setLoading(false);
+    }
   };
 
-  const deleteRule = (id: string) => {
-    setRules(rules.filter(r => r.id !== id));
-  }
+  const handleAddRule = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!newRule.description || !newRule.law_ref) return;
+    
+    try {
+      await api.createLegalRule(newRule);
+      fetchRules();
+      setIsAdding(false);
+      setNewRule({ description: "", law_ref: "", severity: "MEDIUM", category: "privacy" });
+    } catch (error) {
+      alert("Failed to create rule");
+    }
+  };
+
+  const deleteRule = async (id: string) => {
+    if(!confirm("Are you sure you want to delete this rule?")) return;
+    try {
+      await api.deleteLegalRule(id);
+      setRules(rules.filter(r => r.id !== id));
+    } catch (error) {
+      alert("Failed to delete rule");
+    }
+  };
+
 
   return (
     <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="space-y-8">
@@ -55,12 +78,12 @@ export default function RuleManagement() {
               <h3 className="text-xl font-bold mb-4 flex items-center gap-2"><PlusCircle className="text-purple-400" size={24}/> Create New Legal Rule</h3>
               <form onSubmit={handleAddRule} className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div className="space-y-1">
-                  <label className="text-xs text-slate-400 uppercase tracking-widest font-bold">Rule Name / Description</label>
-                  <input type="text" autoFocus value={newRule.name} onChange={e => setNewRule({...newRule, name: e.target.value})} className="w-full bg-[#0b1326] border border-white/10 rounded-lg p-3 text-white focus:ring-1 focus:ring-purple-500 focus:border-purple-500 transition-all font-body" placeholder="e.g. Tracking Cookies Requires Consent" />
+                  <label className="text-xs text-slate-400 uppercase tracking-widest font-bold">Rule Description</label>
+                  <input type="text" autoFocus value={newRule.description} onChange={e => setNewRule({...newRule, description: e.target.value})} className="w-full bg-[#0b1326] border border-white/10 rounded-lg p-3 text-white focus:ring-1 focus:ring-purple-500 focus:border-purple-500 transition-all font-body" placeholder="e.g. Tracking Cookies Requires Consent" />
                 </div>
                 <div className="space-y-1">
-                  <label className="text-xs text-slate-400 uppercase tracking-widest font-bold">Referenced Article</label>
-                  <input type="text" value={newRule.article} onChange={e => setNewRule({...newRule, article: e.target.value})} className="w-full bg-[#0b1326] border border-white/10 rounded-lg p-3 text-white focus:ring-1 focus:ring-purple-500 focus:border-purple-500 transition-all font-body" placeholder="e.g. Decree 13 - Art. 9" />
+                  <label className="text-xs text-slate-400 uppercase tracking-widest font-bold">Referenced Article (NĐ13/Luật 91)</label>
+                  <input type="text" value={newRule.law_ref} onChange={e => setNewRule({...newRule, law_ref: e.target.value})} className="w-full bg-[#0b1326] border border-white/10 rounded-lg p-3 text-white focus:ring-1 focus:ring-purple-500 focus:border-purple-500 transition-all font-body" placeholder="e.g. NĐ13 - Article 9" />
                 </div>
                 <div className="md:col-span-2 pt-2">
                   <button type="submit" className="bg-purple-600 text-white font-bold py-3 px-6 rounded-lg w-full md:w-auto hover:brightness-110 active:scale-95 transition-all">Save & Sync to Engine</button>
@@ -81,16 +104,20 @@ export default function RuleManagement() {
         <table className="w-full text-left font-body">
           <thead>
             <tr className="bg-white/[0.02] text-slate-400 text-xs uppercase tracking-widest">
-              <th className="p-4 font-semibold">ID</th>
+              <th className="p-4 font-semibold">ID Prefix</th>
               <th className="p-4 font-semibold">Rule Context</th>
               <th className="p-4 font-semibold">Article</th>
-              <th className="p-4 font-semibold">Status</th>
+              <th className="p-4 font-semibold">Severity</th>
               <th className="p-4 font-semibold text-right">Actions</th>
             </tr>
           </thead>
           <tbody className="divide-y divide-white/5">
             <AnimatePresence>
-              {rules.map((rule) => (
+              {loading ? (
+                <tr>
+                  <td colSpan={5} className="p-12 text-center text-slate-500"><Loader2 className="animate-spin mx-auto mb-2" /> Loading rules...</td>
+                </tr>
+              ) : rules.map((rule) => (
                 <motion.tr 
                   key={rule.id}
                   initial={{ opacity: 0, x: -10 }}
@@ -98,12 +125,12 @@ export default function RuleManagement() {
                   exit={{ opacity: 0, scale: 0.95 }}
                   className="hover:bg-white/[0.02] transition-colors group"
                 >
-                  <td className="p-4 font-mono text-sm text-slate-400">{rule.id}</td>
-                  <td className="p-4 font-semibold">{rule.name}</td>
-                  <td className="p-4 text-purple-300">{rule.article}</td>
+                  <td className="p-4 font-mono text-xs text-slate-400">{rule.id.substring(0, 8)}...</td>
+                  <td className="p-4 font-semibold">{rule.description}</td>
+                  <td className="p-4 text-purple-300">{rule.law_ref}</td>
                   <td className="p-4">
-                    <span className={`inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-bold uppercase ${rule.status === 'active' ? 'bg-[#3cddc7]/10 text-[#3cddc7]' : 'bg-slate-800 text-slate-400'}`}>
-                      {rule.status === 'active' && <CheckCircle2 size={12}/>} {rule.status}
+                    <span className={`inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-bold uppercase ${rule.severity === 'HIGH' || rule.severity === 'CRITICAL' ? 'bg-red-500/10 text-red-500' : 'bg-yellow-500/10 text-yellow-500'}`}>
+                      {rule.severity}
                     </span>
                   </td>
                   <td className="p-4 text-right opacity-0 group-hover:opacity-100 transition-opacity">
@@ -115,6 +142,7 @@ export default function RuleManagement() {
             </AnimatePresence>
           </tbody>
         </table>
+
         {rules.length === 0 && (
           <div className="p-12 text-center text-slate-500 font-bold flex flex-col items-center gap-2">
             <CheckCircle2 size={48} className="opacity-20 mb-2"/>

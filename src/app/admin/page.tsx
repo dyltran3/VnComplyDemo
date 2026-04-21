@@ -3,26 +3,31 @@ import { useState, useEffect } from "react";
 import { motion } from "framer-motion";
 import D3SystemMetrics from "@/components/charts/D3SystemMetrics";
 import { Server, Cpu, HardDrive, Network } from "lucide-react";
+import { api } from "@/lib/api";
 
 export default function AdminDashboard() {
-  const [cpuData, setCpuData] = useState<number[]>(Array.from({ length: 40 }, () => Math.random() * 60 + 20));
-  const [ramData, setRamData] = useState<number[]>(Array.from({ length: 40 }, () => Math.random() * 40 + 40));
+  const [cpuData, setCpuData] = useState<number[]>(Array.from({ length: 40 }, () => 0));
+  const [ramData, setRamData] = useState<number[]>(Array.from({ length: 40 }, () => 0));
+  const [metrics, setMetrics] = useState<any>(null);
   const [engineStatus, setEngineStatus] = useState<"running" | "idle">("running");
 
-  // Simulate real-time metrics with intervals (Polling Mock)
   useEffect(() => {
-    const interval = setInterval(() => {
-      setCpuData(prev => [...prev.slice(1), Math.random() * 60 + (engineStatus === 'running' ? 30 : 5)]);
-    }, 1500);
-    return () => clearInterval(interval);
-  }, [engineStatus]);
+    const fetchMetrics = async () => {
+      try {
+        const data = await api.getSystemMetrics();
+        setMetrics(data);
+        setCpuData(prev => [...prev.slice(1), data.cpu]);
+        setRamData(prev => [...prev.slice(1), data.ram]);
+      } catch (err) {
+        console.error("Failed to fetch system metrics", err);
+      }
+    };
 
-  useEffect(() => {
-    const interval = setInterval(() => {
-      setRamData(prev => [...prev.slice(1), Math.random() * 20 + 50]);
-    }, 2000);
+    fetchMetrics();
+    const interval = setInterval(fetchMetrics, 2000);
     return () => clearInterval(interval);
   }, []);
+
 
   return (
     <motion.div initial={{ opacity:0, y: 20 }} animate={{ opacity:1, y: 0 }} transition={{ duration: 0.5 }} className="space-y-8">
@@ -66,10 +71,10 @@ export default function AdminDashboard() {
 
       <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
         {[
-          { icon: Server, label: "Active Jobs", val: engineStatus === 'running' ? "42" : "0", color: "text-[#3cddc7]" },
+          { icon: Server, label: "Active Jobs", val: metrics?.active_jobs || "0", color: "text-[#3cddc7]" },
           { icon: Network, label: "Network I/O", val: "1.2 GB/s", color: "text-[#adc6ff]" },
           { icon: Server, label: "Nodes Live", val: "3 / 3", color: "text-[#a388ee]" },
-          { icon: Cpu, label: "Job Queue", val: "15", color: "text-[#ffb48a]" }
+          { icon: Cpu, label: "Disk Usage", val: `${metrics?.disk || 0}%`, color: "text-[#ffb48a]" }
         ].map((s, idx) => (
            <motion.div key={idx} initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.1 * idx }} className="bg-[#0b1326] border border-white/5 rounded-xl p-6 flex flex-col gap-2 relative overflow-hidden group">
               <div className="absolute top-0 right-0 w-24 h-24 bg-white/5 rounded-full blur-[30px] -translate-y-12 translate-x-12 group-hover:bg-white/10 transition-all duration-500"></div>
@@ -81,6 +86,7 @@ export default function AdminDashboard() {
            </motion.div>
         ))}
       </div>
+
 
     </motion.div>
   );

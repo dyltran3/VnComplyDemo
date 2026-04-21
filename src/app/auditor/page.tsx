@@ -1,17 +1,57 @@
 "use client";
-import { useState } from "react";
+import { useEffect, useState } from "react";
+import { api } from "@/lib/api";
 import { motion, AnimatePresence } from "framer-motion";
-import { ChevronRight, FileSearch, DownloadCloud, AlertTriangle, CheckCircle, Building } from "lucide-react";
-import * as d3 from "d3";
+import { ChevronRight, FileSearch, DownloadCloud, AlertTriangle, CheckCircle, Building, Loader2 } from "lucide-react";
 
 export default function AuditorDashboard() {
   const [selectedClient, setSelectedClient] = useState<any>(null);
+  const [clients, setClients] = useState<any[]>([]);
+  const [loading, setLoading] = useState(true);
 
-  const clients = [
-    { id: 1, name: "FinTech VN Corp", risk: "High", score: 45, violations: 12 },
-    { id: 2, name: "HealthPlus Clinics", risk: "Medium", score: 72, violations: 5 },
-    { id: 3, name: "EduSpace Online", risk: "Low", score: 91, violations: 1 },
-  ];
+  useEffect(() => {
+    const fetchPortfolio = async () => {
+      try {
+        const scans = await api.listScans();
+        // Group scans by domain to create a mock "client" portfolio
+        const grouped: Record<string, any> = {};
+        scans.forEach((s: any) => {
+          const domain = new URL(s.target_url).hostname;
+          if (!grouped[domain]) {
+            grouped[domain] = {
+              id: domain,
+              name: domain,
+              target_url: s.target_url,
+              scans: [],
+              score: 100, // Default
+              violations: 0,
+              risk: "Low"
+            };
+          }
+          grouped[domain].scans.push(s);
+        });
+        
+        // Enhance with mock data for demo since we haven't processed all findings yet
+        const clientList = Object.values(grouped).map(c => ({
+          ...c,
+          violations: Math.floor(Math.random() * 15),
+          score: Math.floor(Math.random() * 40) + 55,
+        })).map(c => ({
+          ...c,
+          risk: c.score < 60 ? "High" : c.score < 80 ? "Medium" : "Low"
+        }));
+
+        setClients(clientList);
+      } catch (err) {
+        console.error("Failed to fetch auditor portfolio", err);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchPortfolio();
+  }, []);
+
 
   return (
     <div className="max-w-6xl mx-auto space-y-8">
@@ -28,26 +68,39 @@ export default function AuditorDashboard() {
               <h3 className="font-bold text-lg">Monitored Entities</h3>
            </div>
            <div className="divide-y divide-[#e2e8f0] flex-1">
-              {clients.map(client => (
-                 <button 
-                   key={client.id}
-                   onClick={() => setSelectedClient(client)}
-                   className={`w-full text-left p-6 flex justify-between items-center hover:bg-slate-50 transition-colors ${selectedClient?.id === client.id ? 'bg-blue-50/50 relative overflow-hidden' : ''}`}
-                 >
-                    {selectedClient?.id === client.id && <div className="absolute left-0 top-0 bottom-0 w-1 bg-blue-600"></div>}
-                    <div>
-                      <h4 className="font-bold text-slate-800">{client.name}</h4>
-                      <p className="text-sm font-medium mt-1 flex items-center gap-2 text-slate-500">
-                         Risk Level: 
-                         <span className={`inline-flex items-center gap-1 font-bold ${client.risk === 'High' ? 'text-red-500' : client.risk === 'Medium' ? 'text-amber-500' : 'text-emerald-500'}`}>
-                           {client.risk === 'High' ? <AlertTriangle size={14}/> : <CheckCircle size={14} />} {client.risk}
-                         </span>
-                      </p>
-                    </div>
-                    <ChevronRight className="text-slate-300" />
-                 </button>
-              ))}
+              {loading ? (
+                <div className="p-12 text-center text-slate-400">
+                  <Loader2 className="animate-spin mx-auto mb-2" />
+                  Loading portfolio...
+                </div>
+              ) : clients.length === 0 ? (
+                <div className="p-12 text-center text-slate-400 fflex flex-col items-center gap-2">
+                   <Building size={48} className="opacity-20 mb-2" />
+                   No clients found in portfolio.
+                </div>
+              ) : (
+                clients.map(client => (
+                  <button 
+                    key={client.id}
+                    onClick={() => setSelectedClient(client)}
+                    className={`w-full text-left p-6 flex justify-between items-center hover:bg-slate-50 transition-colors ${selectedClient?.id === client.id ? 'bg-blue-50/50 relative overflow-hidden' : ''}`}
+                  >
+                     {selectedClient?.id === client.id && <div className="absolute left-0 top-0 bottom-0 w-1 bg-blue-600"></div>}
+                     <div>
+                       <h4 className="font-bold text-slate-800">{client.name}</h4>
+                       <p className="text-sm font-medium mt-1 flex items-center gap-2 text-slate-500">
+                          Risk Level: 
+                          <span className={`inline-flex items-center gap-1 font-bold ${client.risk === 'High' ? 'text-red-500' : client.risk === 'Medium' ? 'text-amber-500' : 'text-emerald-500'}`}>
+                            {client.risk === 'High' ? <AlertTriangle size={14}/> : <CheckCircle size={14} />} {client.risk}
+                          </span>
+                       </p>
+                     </div>
+                     <ChevronRight className="text-slate-300" />
+                  </button>
+                ))
+              )}
            </div>
+
         </div>
 
         {/* Right Column: Interaction Flow - Detailed Risk Assessment */}

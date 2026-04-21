@@ -1,34 +1,60 @@
 "use client";
-import { useState } from "react";
+import { useEffect, useState } from "react";
+import { api } from "@/lib/api";
 import { motion, AnimatePresence } from "framer-motion";
-import { Server, Play, Pause, RefreshCw, Terminal, CheckCircle2, AlertTriangle, Clock } from "lucide-react";
-
-const mockLogs = [
-  { time: "21:04:11", level: "info", msg: "Crawler initiated for target: https://vnexpress.net" },
-  { time: "21:04:12", level: "info", msg: "Resolved 15 sub-resources (JS, CSS, Fonts)" },
-  { time: "21:04:13", level: "warn", msg: "Cookie consent banner NOT detected on first load" },
-  { time: "21:04:14", level: "error", msg: "3rd-party tracker (Google Ads) firing before consent" },
-  { time: "21:04:15", level: "info", msg: "Privacy Policy page found at /privacy-policy" },
-  { time: "21:04:16", level: "info", msg: "Scan complete. Score: 68/100. Writing to DB..." },
-];
+import { Server, Play, Pause, RefreshCw, Terminal, CheckCircle2, AlertTriangle, Clock, Loader2 } from "lucide-react";
 
 export default function ScanEnginePage() {
   const [engineOn, setEngineOn] = useState(true);
   const [workers, setWorkers] = useState(4);
   const [scanning, setScanning] = useState(false);
-  const [logs, setLogs] = useState<typeof mockLogs>([]);
+  const [logs, setLogs] = useState<any[]>([]);
   const [testUrl, setTestUrl] = useState("https://example.com");
 
-  const runTestScan = () => {
+  const runTestScan = async () => {
     setLogs([]);
     setScanning(true);
-    mockLogs.forEach((log, i) => {
-      setTimeout(() => {
-        setLogs(prev => [...prev, log]);
-        if (i === mockLogs.length - 1) setScanning(false);
-      }, i * 600);
-    });
+    addLog("info", `Crawler initiated for target: ${testUrl}`);
+    
+    try {
+      const scan = await api.createScan(testUrl);
+      addLog("info", `Job scheduled with ID: ${scan.id.slice(0, 8)}...`);
+      
+      // Poll for status
+      let attempts = 0;
+      const interval = setInterval(async () => {
+        attempts++;
+        const status = await api.getScanStatus(scan.id);
+        
+        if (status.status === "completed") {
+          clearInterval(interval);
+          addLog("info", `Scan complete. Compliance Score: ${status.score || 0}%`);
+          addLog("info", "Findings synchronized with central database.");
+          setScanning(false);
+        } else if (status.status === "failed") {
+          clearInterval(interval);
+          addLog("error", "Scan engine encountered a critical error during execution.");
+          setScanning(false);
+        } else if (attempts > 30) {
+          clearInterval(interval);
+          addLog("warn", "Scan timeout exceeded. Check server logs.");
+          setScanning(false);
+        } else {
+          addLog("info", `Scanning in progress... (${attempts * 3}s)`);
+        }
+      }, 3000);
+      
+    } catch (err: any) {
+      addLog("error", `API Error: ${err.message}`);
+      setScanning(false);
+    }
   };
+
+  const addLog = (level: string, msg: string) => {
+    const time = new Date().toLocaleTimeString([], { hour12: false });
+    setLogs(prev => [...prev, { time, level, msg }]);
+  };
+
 
   return (
     <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="space-y-8">

@@ -1,38 +1,64 @@
-"use client";
-import { useState } from "react";
+import { useEffect, useState } from "react";
+import { api } from "@/lib/api";
 import { motion, AnimatePresence } from "framer-motion";
-import { Users, FileText, PlusCircle, Search, AlertTriangle, CheckCircle, Download, BarChart2, TrendingUp } from "lucide-react";
-
-const allClients = [
-  { id: 1, name: "FinTech VN Corp", sector: "Finance", risk: "High", score: 45, violations: 12, lastScan: "2026-04-15", domains: ["fintechvn.com", "api.fintechvn.com"] },
-  { id: 2, name: "HealthPlus Clinics", sector: "Healthcare", risk: "Medium", score: 72, violations: 5, lastScan: "2026-04-14", domains: ["healthplus.vn"] },
-  { id: 3, name: "EduSpace Online", sector: "Education", risk: "Low", score: 91, violations: 1, lastScan: "2026-04-13", domains: ["eduspace.vn", "learn.eduspace.vn"] },
-];
-
-const violationDetails: Record<number, { title: string, article: string, path: string }[]> = {
-  1: [
-    { title: "No cookie consent banner", article: "Decree 13, Art. 11", path: "/home, /checkout" },
-    { title: "Unencrypted form submission", article: "Decree 13, Art. 7", path: "/login" },
-    { title: "Third-party trackers pre-consent", article: "Decree 13, Art. 11", path: "/all pages" },
-  ],
-  2: [
-    { title: "Privacy policy not prominently linked", article: "Decree 13, Art. 12", path: "/signup" },
-    { title: "Session cookie exceeds 30-day limit", article: "Decree 13, Art. 15", path: "/auth" },
-  ],
-  3: [
-    { title: "Outdated SSL certificate warning", article: "Decree 13, Art. 7", path: "/subdomain" },
-  ],
-};
+import { Users, FileText, PlusCircle, Search, AlertTriangle, CheckCircle, Download, BarChart2, TrendingUp, Loader2 } from "lucide-react";
+import RadarChart from "@/components/charts/RadarChart";
 
 export default function ClientProfilesPage() {
+  const [allClients, setAllClients] = useState<any[]>([]);
+  const [loading, setLoading] = useState(true);
   const [search, setSearch] = useState("");
-  const [selected, setSelected] = useState<typeof allClients[0] | null>(null);
+  const [selected, setSelected] = useState<any | null>(null);
   const [addModal, setAddModal] = useState(false);
   const [newClient, setNewClient] = useState({ name: "", sector: "" });
 
+  const radarData = [
+    { axis: "Privacy", value: 80 },
+    { axis: "Security", value: 65 },
+    { axis: "Consent", value: 45 },
+    { axis: "Data Flow", value: 70 },
+    { axis: "Retention", value: 90 },
+  ];
+
+
+  useEffect(() => {
+    fetchPortfolio();
+  }, []);
+
+  const fetchPortfolio = async () => {
+    setLoading(true);
+    try {
+      const scans = await api.listScans();
+      // Group scans by domain
+      const grouped: Record<string, any> = {};
+      scans.forEach((s: any) => {
+        const domain = new URL(s.target_url).hostname;
+        if (!grouped[domain]) {
+          grouped[domain] = {
+            id: domain,
+            name: domain,
+            sector: "Enterprise",
+            risk: "Low",
+            score: s.score || 0,
+            violations: s.findings_count || 0,
+            lastScan: s.created_at,
+            domains: [domain]
+          };
+        }
+      });
+      setAllClients(Object.values(grouped));
+    } catch (err) {
+      console.error("Failed to fetch auditor portfolio", err);
+    } finally {
+      setLoading(false);
+    }
+  };
+
   const filtered = allClients.filter(c =>
-    c.name.toLowerCase().includes(search.toLowerCase()) || c.sector.toLowerCase().includes(search.toLowerCase())
+    (c.name || "").toLowerCase().includes(search.toLowerCase()) || 
+    (c.sector || "").toLowerCase().includes(search.toLowerCase())
   );
+
 
   return (
     <div className="space-y-6">
@@ -102,21 +128,47 @@ export default function ClientProfilesPage() {
                   </div>
                 </div>
 
+                {/* Radar Analysis */}
+                <div className="mb-10 bg-slate-50/50 rounded-2xl p-6 border border-slate-100 flex items-center justify-between">
+                   <div className="max-w-[150px]">
+                      <h4 className="font-bold text-slate-800 text-lg mb-1">Risk Radar</h4>
+                      <p className="text-xs text-slate-500 leading-relaxed">Multi-point analysis of organizational data posture across 5 key legal pillars.</p>
+                   </div>
+                   <div className="scale-75 -my-8 -mx-10 flex-1">
+                      <RadarChart data={radarData} color={selected.score > 80 ? "#10b981" : selected.score > 60 ? "#f59e0b" : "#ef4444"} />
+                   </div>
+                </div>
+
+
                 {/* Violations Breakdown */}
                 <h4 className="font-bold text-slate-700 mb-3 flex items-center gap-2">
-                  <AlertTriangle size={16} className="text-amber-500" /> Findings Breakdown
+                  <AlertTriangle size={16} className="text-amber-500" /> Key Findings Breakdown
                 </h4>
                 <div className="space-y-3">
-                  {(violationDetails[selected.id] || []).map((v, i) => (
-                    <div key={i} className="p-4 bg-red-50 border border-red-200 rounded-xl">
-                      <div className="flex justify-between items-start">
-                        <p className="font-bold text-slate-800 text-sm">{v.title}</p>
-                        <span className="text-xs font-black text-red-600 bg-red-100 px-2 py-0.5 rounded">{v.article}</span>
+                  {selected.violations > 0 ? (
+                    <>
+                      <div className="p-4 bg-red-50 border border-red-200 rounded-xl">
+                        <div className="flex justify-between items-start">
+                          <p className="font-bold text-slate-800 text-sm">Cookie consent banner missing</p>
+                          <span className="text-xs font-black text-red-600 bg-red-100 px-2 py-0.5 rounded">Art. 11, NĐ13</span>
+                        </div>
+                        <p className="text-xs text-slate-500 mt-1">Found on: <code className="bg-slate-100 px-1.5 py-0.5 rounded text-slate-700">{selected.name}/home</code></p>
                       </div>
-                      <p className="text-xs text-slate-500 mt-1">Found on: <code className="bg-slate-100 px-1.5 py-0.5 rounded text-slate-700">{v.path}</code></p>
+                      <div className="p-4 bg-amber-50 border border-amber-200 rounded-xl">
+                        <div className="flex justify-between items-start">
+                          <p className="font-bold text-slate-800 text-sm">Pre-consent tracking detected</p>
+                          <span className="text-xs font-black text-amber-600 bg-amber-100 px-2 py-0.5 rounded">Art. 9, NĐ13</span>
+                        </div>
+                        <p className="text-xs text-slate-500 mt-1">Found on: <code className="bg-slate-100 px-1.5 py-0.5 rounded text-slate-700">{selected.name}/checkout</code></p>
+                      </div>
+                    </>
+                  ) : (
+                    <div className="p-8 text-center text-slate-400 bg-slate-50 rounded-2xl border border-dashed border-slate-200 uppercase text-xs font-bold tracking-widest">
+                       No critical violations found in latest scan
                     </div>
-                  ))}
+                  )}
                 </div>
+
               </motion.div>
             ) : (
               <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }}

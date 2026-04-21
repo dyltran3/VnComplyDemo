@@ -1,20 +1,37 @@
 "use client";
-import { useState } from "react";
+import { useEffect, useState } from "react";
+import { api } from "@/lib/api";
 import { motion, AnimatePresence } from "framer-motion";
-import { Clock, Download, RefreshCw, Search, AlertTriangle, CheckCircle, BarChart2, TrendingDown } from "lucide-react";
-
-const historyData = [
-  { id: 1, url: "https://vnexpress.net", date: "2026-04-15 21:04", score: 68, violations: 3, status: "completed" },
-  { id: 2, url: "https://shopee.vn", date: "2026-04-14 18:30", score: 85, violations: 1, status: "completed" },
-  { id: 3, url: "https://tiki.vn", date: "2026-04-13 10:10", score: 53, violations: 6, status: "completed" },
-  { id: 4, url: "https://tuoitre.vn", date: "2026-04-12 09:45", score: 91, violations: 0, status: "completed" },
-];
+import { Clock, Download, RefreshCw, Search, AlertTriangle, CheckCircle, BarChart2, TrendingDown, Loader2 } from "lucide-react";
 
 export default function ScanHistoryPage() {
+  const [historyData, setHistoryData] = useState<any[]>([]);
+  const [loading, setLoading] = useState(true);
   const [query, setQuery] = useState("");
-  const [selected, setSelected] = useState<typeof historyData[0] | null>(null);
+  const [selected, setSelected] = useState<any | null>(null);
 
-  const filtered = historyData.filter(h => h.url.includes(query.toLowerCase()));
+  useEffect(() => {
+    fetchHistory();
+  }, []);
+
+  const fetchHistory = async () => {
+    setLoading(true);
+    try {
+      // In a real system, we'd have a listScans endpoint. 
+      // For now, we'll try to get the latest scan results or simulate the list.
+      const data = await api.listUserScans(); // Assuming I need to add this or use existing findings
+      setHistoryData(data);
+    } catch (err) {
+      console.error("Failed to fetch history", err);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const filtered = (historyData || []).filter(h => 
+    (h.target_url || "").toLowerCase().includes(query.toLowerCase())
+  );
+
 
   return (
     <div className="max-w-4xl mx-auto space-y-8">

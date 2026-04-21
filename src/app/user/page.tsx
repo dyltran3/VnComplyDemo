@@ -3,6 +3,7 @@ import { useState, useEffect, useRef } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { Search, ShieldCheck, AlertCircle, RefreshCw, FileText, Download } from "lucide-react";
 import * as d3 from "d3";
+import { api } from "@/lib/api";
 
 function D3ScoreRing({ score }: { score: number }) {
   const ref = useRef<HTMLDivElement>(null);
@@ -50,21 +51,46 @@ export default function UserDashboard() {
   const [url, setUrl] = useState("");
   const [scanState, setScanState] = useState<"idle" | "scanning" | "results">("idle");
   const [progress, setProgress] = useState(0);
+  const [findings, setFindings] = useState<any[]>([]);
+  const [score, setScore] = useState(0);
 
-  const startScan = (e: React.FormEvent) => {
+  const startScan = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!url) return;
     setScanState("scanning");
-    setProgress(0);
+    setProgress(5);
     
-    // Mock the interactive scan progress
-    const int = setInterval(() => {
-       setProgress(p => {
-           if (p >= 100) { clearInterval(int); setScanState("results"); return 100; }
-           return p + Math.random() * 20;
-       });
-    }, 500);
+    try {
+      const scan = await api.createScan(url, "full");
+      const scanId = scan.id;
+
+      const pollInterval = setInterval(async () => {
+        try {
+          const statusRes = await api.getScanStatus(scanId);
+          setProgress(statusRes.progress);
+
+          if (statusRes.status === "completed") {
+            clearInterval(pollInterval);
+            const findingsRes = await api.getScanFindings(scanId);
+            setFindings(findingsRes);
+            const calculatedScore = Math.max(0, 100 - (findingsRes.length * 8));
+            setScore(calculatedScore);
+            setScanState("results");
+          } else if (statusRes.status === "failed") {
+            clearInterval(pollInterval);
+            alert("Scan failed: " + statusRes.error_msg);
+            setScanState("idle");
+          }
+        } catch (err) {
+          console.error("Polling error", err);
+        }
+      }, 2000);
+    } catch (err) {
+      alert("Failed to start scan");
+      setScanState("idle");
+    }
   };
+
 
   return (
     <div className="max-w-4xl mx-auto space-y-8">
@@ -125,8 +151,10 @@ export default function UserDashboard() {
              {/* Left Column: Score */}
              <div className="bg-white rounded-3xl p-8 shadow-xl border border-slate-100 text-center flex flex-col items-center justify-center">
                 <h3 className="text-slate-500 font-bold uppercase tracking-widest text-sm">Overall Compliance Score</h3>
-                <D3ScoreRing score={68} />
-                <p className="text-sm font-medium text-slate-600">Your site is largely compliant, but requires minor updates to the consent mechanisms.</p>
+                <D3ScoreRing score={score} />
+                <p className="text-sm font-medium text-slate-600">
+                  {score > 80 ? "Your site is highly compliant with Decree 13." : score > 50 ? "Your site is largely compliant, but requires updates." : "Critical compliance issues detected."}
+                </p>
                 
                 <button className="w-full mt-6 bg-slate-800 text-white font-bold py-3 rounded-xl flex items-center justify-center gap-2 hover:bg-slate-700">
                   <Download size={18}/> Download Full PDF
@@ -135,32 +163,39 @@ export default function UserDashboard() {
 
              {/* Right Column: Violations and Issues */}
              <div className="md:col-span-2 space-y-6">
-                <div className="bg-white p-6 rounded-3xl shadow-xl border border-slate-100 flex gap-4 items-start">
-                   <div className="bg-amber-100 text-amber-600 p-3 rounded-xl"><AlertCircle size={24}/></div>
-                   <div className="flex-1">
-                      <h4 className="font-bold text-lg mb-1">Missing Cookie Consent Banner</h4>
-                      <p className="text-slate-600 text-sm mb-3">The site sets 3 tracking cookies on load without prior user consent. This violates basic data protection principles.</p>
-                      <div className="flex items-center gap-2 bg-slate-50 p-2 rounded-lg border border-slate-200">
-                         <span className="material-symbols-outlined text-sm text-slate-400">gavel</span>
-                         <span className="text-xs font-bold text-slate-500 uppercase">Legal Mapping: Decree 13, Article 11</span>
+                {findings.length > 0 ? findings.map((f, i) => (
+                  <div key={i} className="bg-white p-6 rounded-3xl shadow-xl border border-slate-100 flex gap-4 items-start">
+                    <div className={`${f.severity === 'CRITICAL' || f.severity === 'HIGH' ? 'bg-red-100 text-red-600' : 'bg-amber-100 text-amber-600'} p-3 rounded-xl`}>
+                      {f.category === 'privacy' ? <ShieldCheck size={24}/> : <AlertCircle size={24}/>}
+                    </div>
+                    <div className="flex-1">
+                      <h4 className="font-bold text-lg mb-1">{f.title}</h4>
+                      <p className="text-slate-600 text-sm mb-3">{f.description}</p>
+                      <div className="flex flex-wrap gap-2">
+                        {f.nd13_ref && (
+                          <div className="flex items-center gap-2 bg-slate-50 p-2 rounded-lg border border-slate-200">
+                            <span className="text-[10px] font-bold text-slate-500 uppercase tracking-tight">{f.nd13_ref}</span>
+                          </div>
+                        )}
+                        {f.law91_ref && (
+                          <div className="flex items-center gap-2 bg-indigo-50 p-2 rounded-lg border border-indigo-100">
+                            <span className="text-[10px] font-bold text-indigo-500 uppercase tracking-tight">{f.law91_ref}</span>
+                          </div>
+                        )}
                       </div>
-                   </div>
-                </div>
-
-                <div className="bg-white p-6 rounded-3xl shadow-xl border border-slate-100 flex gap-4 items-start">
-                   <div className="bg-emerald-100 text-emerald-600 p-3 rounded-xl"><ShieldCheck size={24}/></div>
-                   <div className="flex-1">
-                      <h4 className="font-bold text-lg mb-1">Privacy Policy Detect</h4>
-                      <p className="text-slate-600 text-sm mb-3">Privacy policy is accessible and clearly linked in the footer. Readability score is good.</p>
-                      <div className="flex items-center gap-2 bg-slate-50 p-2 rounded-lg border border-slate-200">
-                         <span className="material-symbols-outlined text-sm text-slate-400">gavel</span>
-                         <span className="text-xs font-bold text-slate-500 uppercase">Legal Mapping: Decree 13, Article 12</span>
-                      </div>
-                   </div>
-                </div>
+                    </div>
+                  </div>
+                )) : (
+                  <div className="bg-green-50 p-12 rounded-3xl border border-green-100 text-center flex flex-col items-center">
+                    <ShieldCheck className="text-green-500 mb-4" size={48} />
+                    <h4 className="font-bold text-xl text-green-800">Perfect Compliance!</h4>
+                    <p className="text-green-600">No issues were detected on the site.</p>
+                  </div>
+                )}
              </div>
           </motion.div>
         )}
+
       </AnimatePresence>
 
     </div>

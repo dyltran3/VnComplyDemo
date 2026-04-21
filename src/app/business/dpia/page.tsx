@@ -1,5 +1,6 @@
 "use client";
-import { useState } from "react";
+import { useEffect, useState } from "react";
+import { api } from "@/lib/api";
 import { motion, AnimatePresence } from "framer-motion";
 import { ShieldAlert, CheckCircle, AlertTriangle, ChevronRight, FileText, X, Loader2 } from "lucide-react";
 
@@ -17,16 +18,25 @@ export default function DPIAPage() {
   const [generating, setGenerating] = useState(false);
   const [generated, setGenerated] = useState(false);
 
-  const generateReport = () => {
+  const generateReport = async () => {
     setGenerating(true);
-    setTimeout(() => {
-      setGenerating(false);
+    try {
+      await api.saveDPIA({ 
+        steps: answers, 
+        status: "completed",
+        title: "DPIA for " + new Date().toLocaleDateString()
+      });
       setGenerated(true);
-    }, 2000);
+    } catch (error) {
+      alert("Failed to save DPIA assessment");
+    } finally {
+      setGenerating(false);
+    }
   };
 
   const isComplete = Object.keys(answers).length === dpiaSteps.length &&
-    Object.values(answers).every(v => v.trim().length > 10);
+    Object.values(answers).every(v => v.trim().length > 5); // Reduced for demo usability
+
 
   return (
     <div className="space-y-8">

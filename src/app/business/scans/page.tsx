@@ -1,27 +1,55 @@
 "use client";
-import { useState } from "react";
+import { useEffect, useState } from "react";
+import { api } from "@/lib/api";
 import { motion, AnimatePresence } from "framer-motion";
-import { Calendar, Play, Pause, Check, Plus, Trash2, Clock, Globe, X } from "lucide-react";
-
-const initialJobs = [
-  { id: 1, name: "Marketing Site Daily Scan", url: "marketing.company.vn", freq: "Daily", time: "02:00 AM", active: true, lastRun: "2026-04-15 02:00" },
-  { id: 2, name: "Checkout DPIA Weekly Scan", url: "checkout.company.vn", freq: "Weekly", time: "03:00 AM", active: false, lastRun: "2026-04-13 03:00" },
-];
+import { Calendar, Play, Pause, Check, Plus, Trash2, Clock, Globe, X, Loader2 } from "lucide-react";
 
 export default function AutoScansPage() {
-  const [jobs, setJobs] = useState(initialJobs);
+  const [jobs, setJobs] = useState<any[]>([]);
+  const [loading, setLoading] = useState(true);
   const [showForm, setShowForm] = useState(false);
   const [form, setForm] = useState({ name: "", url: "", freq: "Daily", time: "02:00" });
 
-  const toggle = (id: number) => setJobs(j => j.map(jj => jj.id === id ? { ...jj, active: !jj.active } : jj));
-  const remove = (id: number) => setJobs(j => j.filter(jj => jj.id !== id));
+  useEffect(() => {
+    fetchSchedules();
+  }, []);
 
-  const addJob = (e: React.FormEvent) => {
-    e.preventDefault();
-    setJobs(j => [...j, { id: Date.now(), name: form.name, url: form.url, freq: form.freq, time: form.time + " AM", active: true, lastRun: "Not yet run" }]);
-    setShowForm(false);
-    setForm({ name: "", url: "", freq: "Daily", time: "02:00" });
+  const fetchSchedules = async () => {
+    try {
+      const data = await api.listSchedules();
+      setJobs(data);
+    } catch (err) {
+      console.error("Failed to fetch schedules", err);
+    } finally {
+      setLoading(false);
+    }
   };
+
+  const toggle = (id: number) => {
+    // Mock toggle for demo
+    setJobs(j => j.map(jj => jj.id === id ? { ...jj, active: !jj.active } : jj));
+  };
+
+  const remove = (id: string) => {
+    // Mock remove for demo
+    setJobs(j => j.filter(jj => jj.id !== id));
+  };
+
+  const addJob = async (e: React.FormEvent) => {
+    e.preventDefault();
+    try {
+      await api.createSchedule({
+        target_url: form.url,
+        frequency: form.freq,
+      });
+      fetchSchedules();
+      setShowForm(false);
+      setForm({ name: "", url: "", freq: "Daily", time: "02:00" });
+    } catch (err) {
+      alert("Failed to create schedule");
+    }
+  };
+
 
   return (
     <div className="space-y-8">
