@@ -1,0 +1,659 @@
+TRƯỜNG QUỐC TẾ — ĐẠI HỌC DUY TÂN
+CMU-SE 214 BIS — KỸ THUẬT YÊU CẦU PHẦN MỀM
+TÀI LIỆU PHÂN TÍCH DỰ ÁN TOÀN DIỆN
+VNCOMPLY
+Automated Compliance Assessment System for Decree 13/2023/NĐ-CP
+Phiên bản: 1.0  |  Ngày: 21/04/2026
+Nhóm 1 — CMU-SE 214 BIS
+Họ và Tên
+MSSV
+Email
+Huỳnh Trần Đức Kiên (Leader)
+30219038415
+huynhtranduckie4126@gmail.com
+Trương Ngọc Thiên An
+30219143238
+truongngocthienan2110@gmail.com
+Nguyễn Xuân Danh
+30219147757
+sdank2006@gmail.com
+Mai Nguyễn Hồng Nhung
+30202156889
+maihongnhung@dtu.edu.vn
+Trần Tuấn Anh
+30219145092
+trantuananh12@dtu.edu.vn
+Giảng viên hướng dẫn: Th.S Nguyễn Thị Thanh Tâm
+1. TỔNG QUAN DỰ ÁN
+1.1. Thông tin dự án
+Tên viết tắt
+VNCOMPLY
+Tên đầy đủ
+Automated Compliance Assessment System for Decree 13/2023/NĐ-CP
+Thời gian
+19/01/2026 — 19/04/2026
+Đơn vị thực hiện
+Trường Quốc tế, Đại học Duy Tân
+Giảng viên hướng dẫn
+Th.S Nguyễn Thị Thanh Tâm
+Trưởng nhóm / Liên hệ
+Huỳnh Trần Đức Kiên — huynhtranduckie4126@gmail.com — 0797723234
+GitHub Repository
+https://github.com/dyltran3/VnComplyDemo
+Phiên bản tài liệu
+2.0 (01/02/2026)
+1.2. Bối cảnh và vấn đề
+Trong nền kinh tế số hiện đại, dữ liệu cá nhân trở thành tài sản chiến lược của mỗi doanh nghiệp. Tại thị trường Việt Nam, khung pháp lý về bảo vệ dữ liệu cá nhân đã được siết chặt đáng kể với hai văn bản pháp luật trọng yếu: Nghị định 13/2023/NĐ-CP và Luật Bảo vệ Dữ liệu Cá nhân số 91/2025/QH15. Theo đó, các tổ chức không tuân thủ có thể đối mặt với mức phạt lên đến 5% tổng doanh thu hàng năm — một rủi ro tài chính và pháp lý nghiêm trọng đối với bất kỳ doanh nghiệp nào.
+Hiện tại, hầu hết các tổ chức tại Việt Nam áp dụng một trong ba phương pháp quản lý tuân thủ truyền thống, mỗi phương pháp đều mang những hạn chế cố hữu:
+Tư vấn pháp lý thủ công: Chi phí cao, chỉ phản ánh trạng thái tại một thời điểm, không phát hiện được vi phạm phát sinh sau mỗi lần cập nhật nền tảng số.
+Công cụ quét bảo mật tổng quát: Phát hiện lỗ hổng phần mềm nhưng không nhận diện được các vi phạm đặc thù về quyền riêng tư theo quy định pháp luật Việt Nam.
+Danh sách kiểm tra nội bộ (checklist/spreadsheet): Thiếu tính khách quan, không tạo ra nhật ký kiểm toán có giá trị pháp lý trong các cuộc thanh tra chính thức.
+Tồn tại một khoảng cách đáng kể giữa yêu cầu pháp lý (có tính trừu tượng) và triển khai kỹ thuật (có tính cụ thể). Doanh nghiệp thiếu một công cụ tự động chuyển đổi các điều khoản pháp luật thành các kiểm tra kỹ thuật có thể thực thi, dẫn đến tình trạng vi phạm chỉ được phát hiện sau khi xảy ra sự cố.
+1.3. Giải pháp — VnComply
+VnComply là nền tảng LegalTech tiên phong được thiết kế để tự động hóa quá trình giám sát và đánh giá tuân thủ bảo vệ dữ liệu cá nhân tại Việt Nam. Hệ thống hoạt động 24/7, thay thế hoàn toàn các quy trình kiểm tra thủ công, và cung cấp các chức năng cốt lõi sau:
+Phát hiện sớm rủi ro pháp lý và vi phạm kỹ thuật trên website và ứng dụng số của doanh nghiệp.
+Bảo vệ quyền của chủ thể dữ liệu thông qua kiểm tra tự động các yêu cầu chức năng như rút lại đồng ý và yêu cầu xóa dữ liệu.
+Giám sát luồng dữ liệu để cảnh báo về việc truyền thông tin trái phép cho bên thứ ba hoặc tổ chức nước ngoài.
+Tạo báo cáo kiểm toán toàn diện phục vụ làm bằng chứng về sự cẩn trọng của tổ chức trước cơ quan quản lý nhà nước.
+Tối ưu chi phí nhân sự và giảm thiểu sai sót từ quy trình kiểm tra định kỳ bằng tay.
+2. KIẾN TRÚC HỆ THỐNG VÀ PHẠM VI
+2.1. Phạm vi hệ thống
+Phạm vi dự án được xác định rõ ràng nhằm đảm bảo tính khả thi kỹ thuật và tập trung vào các lĩnh vực rủi ro cao nhất:
+Hệ thống thực hiện thu thập dữ liệu tự động và tương tác với các website công khai để xác định tất cả các biểu mẫu thu thập thông tin.
+Giải pháp tiến hành kiểm tra kỹ thuật đối với mã theo dõi (tracking codes) và cookies, đảm bảo các thành phần này không kích hoạt trước khi có sự đồng ý rõ ràng của người dùng.
+Ứng dụng công nghệ Xử lý Ngôn ngữ Tự nhiên (NLP) để đánh giá nội dung Chính sách Bảo mật so với các yêu cầu pháp lý hiện hành.
+Tự động tạo báo cáo PDF liên kết kết quả kỹ thuật trực tiếp với các điều khoản pháp luật cụ thể kèm hướng dẫn khắc phục.
+Không bao gồm: kiểm tra kiến trúc cơ sở dữ liệu nội bộ (SQL) và đánh giá các quy trình hành chính vật lý tại văn phòng doanh nghiệp.
+2.2. Ngăn xếp công nghệ (Technology Stack)
+Lớp / Thành phần
+Công nghệ
+Mục đích sử dụng
+Frontend Framework
+Next.js 14 (App Router)
+Cấu trúc định tuyến theo file, Server/Client Components
+Ngôn ngữ lập trình
+TypeScript 5
+Kiểm tra kiểu tĩnh toàn bộ codebase
+Giao diện người dùng
+Tailwind CSS 3
+Utility classes, dark mode, custom color tokens
+Hoạt cảnh / Animation
+Framer Motion 12
+Page transitions, modal animations, micro-interactions
+Trực quan hóa dữ liệu
+D3.js 7
+Biểu đồ SVG (CPU/RAM metrics), compliance score ring
+Icon system
+Lucide React
+Bộ icon SVG nhất quán
+Backend / Database
+Supabase + PostgreSQL
+Lưu trữ dữ liệu, xác thực, realtime (backend thực)
+HTTP Client
+lib/api.ts
+Kết nối tới backend API
+2.3. Cấu trúc các Portal theo vai trò
+Hệ thống VnComply được thiết kế theo mô hình đa cổng (multi-portal), mỗi cổng phục vụ một nhóm người dùng riêng biệt với quyền truy cập được kiểm soát theo vai trò (RBAC):
+Portal
+Đường dẫn
+Chức năng chính
+System Admin
+/admin
+Quản lý hệ thống, Engine quét, quy tắc pháp lý, kiểm soát tài khoản, audit logs
+Individual User
+/user
+Quét URL nhanh, xem kết quả, lịch sử quét, tải báo cáo PDF
+Law Firm & Auditor
+/auditor
+Quản lý danh mục khách hàng, đánh giá rủi ro, xuất báo cáo pháp lý
+Business Enterprise
+/business
+Lên lịch quét tự động, DPIA wizard, cấu hình chính sách tổ chức, cảnh báo
+3. PHÂN TÍCH THEO TỪNG ACTOR
+Hệ thống VnComply xác định năm nhóm người dùng chính (actors), được ánh xạ vào bốn portal. Phần này trình bày đặc điểm, phạm vi trách nhiệm, luồng tương tác, và toàn bộ use cases của mỗi actor theo tài liệu gốc.
+3.1. Actor 1 — Individual User (Người dùng cá nhân)
+3.1.1. Mô tả Actor
+Individual User là nhóm người dùng không thuộc tổ chức, truy cập hệ thống để thực hiện các kiểm tra tuân thủ nhanh trên một URL cụ thể mà không cần đăng ký tài khoản doanh nghiệp. Đây là nhóm người dùng có nhu cầu kiểm tra nhanh, nhận kết quả tức thời và xem lại lịch sử quét cá nhân.
+3.1.2. Quyền truy cập hệ thống
+Portal được phân công: /user
+Màn hình chính (/user/page.tsx): Quick Scan với biểu đồ điểm số compliance dạng arc ring (D3.js)
+Lịch sử quét (/user/history/page.tsx): Danh sách các lượt quét đã thực hiện
+Báo cáo (/user/reports/page.tsx): Tải xuống báo cáo PDF từ kết quả quét
+Trang kết quả động (/results/[id]/page.tsx): Hiển thị chi tiết kết quả một lượt quét cụ thể
+3.1.3. User Stories
+ID
+Epic
+As a...
+I want to
+So that
+Ghi chú
+IU01
+Scan
+Individual User
+Submit a URL for a quick scan
+I can immediately check if a website complies with Decree 13 without creating an account
+Không yêu cầu xác thực nâng cao
+IU02
+Scan
+Individual User
+Submit a URL for a full/deep scan
+I can receive a comprehensive compliance report with detailed findings
+Cần đăng nhập để lưu kết quả
+IU03
+Results
+Individual User
+View consent check results
+I can see whether the website properly requests user consent
+IU04
+Results
+Individual User
+View cookie tracker detection results
+I can identify all tracking cookies running on the website
+IU05
+Reports
+Individual User
+Download a basic compliance report
+I have a document summarizing the compliance status
+Định dạng PDF
+IU06
+History
+Individual User
+View scan history
+I can review all previous scans and track progress over time
+Lịch sử liên kết với tài khoản
+3.1.4. Use Cases chi tiết
+UC-IU01 — Quét URL nhanh (Quick Scan)
+Actor
+Individual User
+Mô tả
+Người dùng nhập một URL website vào ô tìm kiếm và yêu cầu hệ thống thực hiện quét nhanh. Hệ thống trả về kết quả trong vòng 45 giây bao gồm điểm tuân thủ tổng thể và các cảnh báo chính.
+Điều kiện tiên quyết
+Người dùng đã truy cập portal /user và URL mục tiêu là website công khai có thể truy cập.
+Luồng chính
+Bước 1: Người dùng nhập URL vào trường nhập liệu trên màn hình Quick Scan.
+Bước 2: Người dùng nhấn nút "Scan Now" để khởi chạy quét.
+Bước 3: Hệ thống xác thực định dạng URL và kiểm tra khả năng truy cập.
+Bước 4: Scan Engine thực hiện kiểm tra: consent forms, cookie trackers, HTTPS, privacy policy.
+Bước 5: Kết quả được hiển thị dưới dạng điểm tuân thủ (0–100%) trên biểu đồ arc ring D3.js.
+Bước 6: Danh sách vi phạm được liệt kê theo mức độ nghiêm trọng (Low / Medium / High).
+Điều kiện hậu
+Kết quả quét được lưu vào lịch sử cá nhân của người dùng và hiển thị tại /results/[id].
+Luồng thay thế / Ngoại lệ
+URL không hợp lệ: Hệ thống hiển thị thông báo lỗi và yêu cầu nhập lại.
+Website không phản hồi: Hệ thống ghi nhận lỗi kết nối và thông báo cho người dùng.
+Quét quá thời gian 45 giây: Hệ thống trả về kết quả từng phần với ghi chú chưa hoàn tất.
+User Stories liên quan
+IU01, IU03, IU04
+UC-IU02 — Tải xuống báo cáo tuân thủ (Download Compliance Report)
+Actor
+Individual User
+Mô tả
+Sau khi quét hoàn tất, người dùng yêu cầu tải xuống báo cáo PDF tóm tắt kết quả tuân thủ với đầy đủ chi tiết vi phạm và ánh xạ điều khoản pháp luật.
+Điều kiện tiên quyết
+Lượt quét đã hoàn tất thành công. Người dùng đang xem kết quả tại /results/[id] hoặc /user/reports.
+Luồng chính
+Bước 1: Người dùng điều hướng đến trang /user/reports.
+Bước 2: Người dùng chọn lượt quét cần xuất báo cáo từ danh sách lịch sử.
+Bước 3: Người dùng nhấn nút "Download PDF".
+Bước 4: Hệ thống tạo tệp PDF trong vòng 30 giây chứa: tóm tắt điểm tuân thủ, danh sách vi phạm, ánh xạ điều khoản pháp luật liên quan, và khuyến nghị khắc phục.
+Bước 5: Tệp PDF được tải xuống thiết bị của người dùng.
+Điều kiện hậu
+Người dùng có tệp PDF báo cáo tuân thủ để sử dụng và lưu trữ.
+Luồng thay thế / Ngoại lệ
+Lỗi sinh PDF: Hệ thống thông báo và cho phép người dùng thử lại.
+User Stories liên quan
+IU05, IU06
+3.2. Actor 2 — Businesses & Organizations (Doanh nghiệp & Tổ chức)
+3.2.1. Mô tả Actor
+Businesses & Organizations là nhóm người dùng chính của hệ thống — đây là các doanh nghiệp, tổ chức sở hữu nền tảng số và chịu trách nhiệm pháp lý về tuân thủ Nghị định 13/2023. Nhóm này có nhu cầu quản lý tuân thủ liên tục, lên lịch quét tự động, thực hiện Đánh giá Tác động Bảo vệ Dữ liệu (DPIA), và tạo bằng chứng kiểm toán cho mục đích thanh tra.
+3.2.2. Quyền truy cập hệ thống
+Portal được phân công: /business
+Dashboard doanh nghiệp (/business/page.tsx): Tổng quan tuân thủ của tổ chức
+Quản lý lịch quét (/business/scans/page.tsx): Cấu hình và theo dõi lịch quét tự động
+DPIA Wizard (/business/dpia/page.tsx): Trình dẫn hướng 5 bước thực hiện DPIA
+Chính sách & Webhook (/business/policies/page.tsx): Cấu hình chính sách quét và tích hợp webhook
+3.2.3. User Stories (PB01–PB12)
+ID
+Epic
+As a...
+I want to
+So that
+Ghi chú
+PB01
+Configuration
+Business User
+Configure Alerts
+Tôi có thể được thông báo ngay lập tức khi có vi phạm tuân thủ mới
+Tích hợp webhook cho Slack/Teams
+PB02
+Reporting
+Business User
+Request Compliance Report
+Tôi có thể tạo tài liệu chính thức về tình trạng tuân thủ hiện tại
+Cần watermark Draft/Official
+PB03
+Compliance
+Business User
+Request DPIA Support
+Tôi có thể đáp ứng yêu cầu pháp lý về đánh giá tác động dữ liệu
+Theo khung Nghị định 13/GDPR
+PB04
+Automation
+Business User
+Schedule Auto Scan
+Tôi có thể duy trì giám sát tuân thủ liên tục
+Tránh giờ cao điểm website
+PB05
+Policy
+Business User
+Configure Scan Policy
+Tôi có thể điều chỉnh độ sâu quét theo tiêu chuẩn tổ chức
+Lưu chính sách dưới dạng template
+PB06
+Account
+Business User
+Login Dashboard
+Tôi có thể truy cập tổng quan quản lý của tổ chức
+Hỗ trợ SSO tài khoản doanh nghiệp
+PB07
+Analysis
+Business User
+View Violation Analysis
+Tôi có thể hiểu nguyên nhân gốc rễ của vi phạm tuân thủ
+Phân tích script thu thập nền
+PB08
+Legal
+Business User
+See Law Article Mapping
+Tôi có thể thấy website đang vi phạm điều khoản pháp luật cụ thể nào
+Cập nhật liên tục theo Nghị định 13
+PB09
+Scan Results
+Business User
+See Compliance Score
+Tôi có thể đánh giá nhanh mức độ an toàn tổng thể
+Thuật toán chấm điểm minh bạch
+PB10
+Data
+Business User
+View DPIA Supporting Data
+Tôi có dữ liệu cần thiết để hoàn thành đánh giá pháp lý
+Danh sách bên thứ ba xử lý dữ liệu
+PB11
+Report
+Business User
+Download PDF Compliance Report
+Tôi có tệp chuyên nghiệp để chia sẻ với các bên liên quan
+Mã hóa hoặc ký số tệp xuất
+PB12
+Audit
+Business User
+View Audit Evidence Logs
+Tôi có thể chứng minh với cơ quan quản lý rằng mọi kiểm tra đã được thực hiện
+Lưu trữ tối thiểu 12 tháng, read-only
+3.2.4. Use Cases chi tiết
+UC-PB04 — Lên lịch quét tự động (Schedule Auto Scan)
+Actor
+Business User
+Mô tả
+Doanh nghiệp thiết lập lịch quét định kỳ để hệ thống tự động kiểm tra tuân thủ mà không cần can thiệp thủ công, đảm bảo giám sát liên tục theo thời gian thực.
+Điều kiện tiên quyết
+Người dùng đã đăng nhập với vai trò Business. Tổ chức đã cấu hình ít nhất một URL mục tiêu và chính sách quét.
+Luồng chính
+Bước 1: Business User điều hướng đến /business/scans.
+Bước 2: Người dùng chọn "New Schedule" và chỉ định URL/domain cần giám sát.
+Bước 3: Người dùng cấu hình tần suất quét: Daily, Weekly, hoặc Monthly.
+Bước 4: Người dùng đặt thời điểm bắt đầu chính xác (giờ, ngày).
+Bước 5: Hệ thống kiểm tra xung đột lịch và cảnh báo nếu trùng giờ cao điểm website.
+Bước 6: Người dùng xác nhận lịch. Hệ thống hiển thị thời điểm chạy tiếp theo.
+Bước 7: Đến thời điểm được lên lịch, hệ thống tự động kích hoạt Scan Engine.
+Bước 8: Kết quả được ghi lại và kích hoạt cảnh báo theo cấu hình PB01.
+Điều kiện hậu
+Lịch quét được lưu và hiển thị trong danh sách Active Schedules. Kết quả mỗi lần chạy được ghi vào Audit Evidence Logs (PB12).
+Luồng thay thế / Ngoại lệ
+Hệ thống không thể truy cập URL tại thời điểm quét: Ghi lỗi và thử lại sau 15 phút.
+Xung đột với giờ bảo trì hệ thống: Hệ thống tự động dịch chuyển lịch 1 giờ và thông báo người dùng.
+User Stories liên quan
+PB04, PB05, PB01
+UC-PB03 — Thực hiện Đánh giá Tác động Bảo vệ Dữ liệu (DPIA Wizard)
+Actor
+Business User
+Mô tả
+Hệ thống cung cấp trình dẫn hướng 5 bước để Business User hoàn thành một Đánh giá Tác động Bảo vệ Dữ liệu (DPIA) theo khung của Nghị định 13/2023. Dữ liệu hỗ trợ từ PB10 được tích hợp vào quy trình.
+Điều kiện tiên quyết
+Business User đã đăng nhập với vai trò Business. Tổ chức đã thực hiện ít nhất một lượt quét và có dữ liệu hỗ trợ DPIA.
+Luồng chính
+Bước 1: Người dùng điều hướng đến /business/dpia và chọn "New DPIA Assessment".
+Bước 2 (Bước DPIA 1 — Mô tả hoạt động xử lý): Người dùng nhập thông tin về mục đích, phạm vi xử lý dữ liệu.
+Bước 3 (Bước DPIA 2 — Đánh giá sự cần thiết): Hệ thống gợi ý nội dung từ dữ liệu quét hiện có.
+Bước 4 (Bước DPIA 3 — Xác định rủi ro): Hệ thống liệt kê các rủi ro được phát hiện, phân loại theo mức độ.
+Bước 5 (Bước DPIA 4 — Biện pháp kiểm soát): Người dùng điền các biện pháp giảm thiểu.
+Bước 6 (Bước DPIA 5 — Kết luận và phê duyệt): Người dùng xem xét toàn bộ đánh giá và lưu bản nháp.
+Điều kiện hậu
+Bản đánh giá DPIA được lưu ở trạng thái Draft với khả năng chỉnh sửa. Dữ liệu hỗ trợ từ PB10 được liên kết vào bản đánh giá.
+Luồng thay thế / Ngoại lệ
+Chưa có dữ liệu quét: Hệ thống cảnh báo và hướng dẫn người dùng thực hiện quét trước.
+Mất phiên làm việc giữa chừng: Dữ liệu được lưu tự động sau mỗi bước.
+User Stories liên quan
+PB03, PB10
+UC-PB12 — Xem nhật ký bằng chứng kiểm toán (View Audit Evidence Logs)
+Actor
+Business User
+Mô tả
+Business User truy xuất nhật ký kiểm toán bất biến (immutable) ghi lại toàn bộ hoạt động quét và hành động của hệ thống, phục vụ làm bằng chứng trước cơ quan thanh tra.
+Điều kiện tiên quyết
+Business User đã đăng nhập. Hệ thống đã thực hiện ít nhất một lượt quét và ghi nhật ký.
+Luồng chính
+Bước 1: Business User điều hướng đến phần Audit Logs trong /business/policies hoặc dashboard chính.
+Bước 2: Người dùng lọc nhật ký theo khoảng thời gian, loại sự kiện, hoặc mức độ nghiêm trọng.
+Bước 3: Hệ thống hiển thị danh sách các bản ghi với: timestamp, loại hành động, URL được quét, kết quả.
+Bước 4: Người dùng chọn một bản ghi để xem chi tiết bao gồm ảnh chụp màn hình và bằng chứng mạng.
+Bước 5: Người dùng có thể xuất nhật ký dưới dạng tệp có ký số số để sử dụng trong thanh tra.
+Điều kiện hậu
+Người dùng có tập nhật ký đã được lọc, bất biến và có thể xuất ra để dùng làm bằng chứng kiểm toán. Nhật ký được hệ thống lưu trữ tối thiểu 12 tháng.
+Luồng thay thế / Ngoại lệ
+Nhật ký không tồn tại cho khoảng thời gian yêu cầu: Hệ thống thông báo và gợi ý khoảng thời gian có dữ liệu.
+User Stories liên quan
+PB12, PB02
+3.3. Actor 3 — Law Firms & Auditors (Công ty Luật & Kiểm toán viên)
+3.3.1. Mô tả Actor
+Law Firms & Auditors là các đối tác chuyên nghiệp sử dụng hệ thống để quản lý đồng thời nhiều khách hàng, thực hiện đánh giá rủi ro chuyên sâu, và cung cấp tư vấn pháp lý có cơ sở bằng chứng kỹ thuật. Đây là nhóm người dùng có năng lực chuyên môn pháp lý cao, cần công cụ tổng hợp kết quả theo danh mục khách hàng (portfolio) và xuất báo cáo chuẩn tòa án/thanh tra.
+3.3.2. Quyền truy cập hệ thống
+Portal được phân công: /auditor
+Tổng quan danh mục (/auditor/page.tsx): Portfolio overview — tổng hợp trạng thái tuân thủ của tất cả khách hàng
+Quản lý khách hàng (/auditor/clients/page.tsx): Chi tiết từng khách hàng, so sánh giữa các khách hàng
+Kho báo cáo pháp lý (/auditor/reports/page.tsx): Quản lý và xuất báo cáo pháp lý sẵn sàng cho kiểm toán
+3.3.3. User Stories
+ID
+Epic
+As a...
+I want to
+So that
+Ghi chú
+LA01
+Portfolio
+Law Firm / Auditor
+Manage multiple client portfolios
+Tôi có thể theo dõi trạng thái tuân thủ của tất cả khách hàng từ một giao diện duy nhất
+LA02
+Scan
+Law Firm / Auditor
+Submit client scans on behalf of clients
+Tôi có thể chủ động kiểm tra tình trạng pháp lý của khách hàng mà không cần yêu cầu từ phía họ
+LA03
+Analysis
+Law Firm / Auditor
+Compare clients side-by-side
+Tôi có thể xác định khách hàng nào có rủi ro cao nhất và ưu tiên tư vấn
+LA04
+Reports
+Law Firm / Auditor
+Request legal reports for each client
+Tôi có tài liệu pháp lý chi tiết để lập hồ sơ tư vấn chính thức
+LA05
+Legal
+Law Firm / Auditor
+View client violation summaries by law article
+Tôi có thể nhanh chóng xác định điều khoản nào của pháp luật khách hàng đang vi phạm
+LA06
+Risk
+Law Firm / Auditor
+Access risk assessment data
+Tôi có thể lượng hóa mức độ rủi ro pháp lý của từng khách hàng để đề xuất biện pháp ưu tiên
+LA07
+Audit
+Law Firm / Auditor
+Export audit-ready reports
+Tôi có thể nộp báo cáo trực tiếp cho cơ quan quản lý thay mặt khách hàng
+Ký số tệp xuất
+3.3.4. Use Cases chi tiết
+UC-LA01 — Quản lý danh mục khách hàng (Client Portfolio Management)
+Actor
+Law Firm / Auditor
+Mô tả
+Kiểm toán viên hoặc luật sư truy cập giao diện tổng quan để theo dõi đồng thời trạng thái tuân thủ của toàn bộ danh sách khách hàng, ưu tiên xử lý dựa trên mức độ rủi ro.
+Điều kiện tiên quyết
+Người dùng đã đăng nhập với vai trò Auditor. Ít nhất một khách hàng đã được thêm vào danh mục.
+Luồng chính
+Bước 1: Auditor đăng nhập và điều hướng đến /auditor.
+Bước 2: Hệ thống hiển thị dashboard portfolio với danh sách khách hàng, điểm tuân thủ và mức cảnh báo tổng thể.
+Bước 3: Auditor chọn một khách hàng để xem chi tiết vi phạm tại /auditor/clients.
+Bước 4: Auditor có thể so sánh hai hoặc nhiều khách hàng song song để xác định mức độ rủi ro tương đối.
+Bước 5: Auditor chọn xuất báo cáo tổng hợp vi phạm của khách hàng theo điều khoản pháp luật.
+Điều kiện hậu
+Auditor có cái nhìn tổng thể về danh mục và có thể xác định khách hàng cần ưu tiên tư vấn.
+Luồng thay thế / Ngoại lệ
+Không có dữ liệu quét cho một khách hàng: Hệ thống hiển thị trạng thái "Chưa quét" và gợi ý thực hiện scan.
+User Stories liên quan
+LA01, LA02, LA03
+UC-LA07 — Xuất báo cáo pháp lý sẵn sàng kiểm toán (Export Audit-Ready Legal Report)
+Actor
+Law Firm / Auditor
+Mô tả
+Auditor tạo và xuất báo cáo pháp lý chi tiết cho một khách hàng cụ thể, định dạng phù hợp để nộp cho cơ quan quản lý nhà nước hoặc sử dụng trong thủ tục pháp lý chính thức.
+Điều kiện tiên quyết
+Auditor đã đăng nhập. Khách hàng được chọn có ít nhất một lượt quét đã hoàn tất.
+Luồng chính
+Bước 1: Auditor điều hướng đến /auditor/reports.
+Bước 2: Auditor chọn khách hàng và phạm vi thời gian cần xuất báo cáo.
+Bước 3: Hệ thống tổng hợp: danh sách vi phạm theo điều khoản pháp luật, mức độ rủi ro phân loại, bằng chứng kỹ thuật, và khuyến nghị khắc phục.
+Bước 4: Auditor xem trước báo cáo trước khi xuất.
+Bước 5: Auditor nhấn "Export" và chọn định dạng (PDF).
+Bước 6: Hệ thống ký số tệp PDF để đảm bảo tính toàn vẹn và xác thực nguồn gốc.
+Bước 7: Tệp được tải xuống và/hoặc gửi đến địa chỉ email được chỉ định.
+Điều kiện hậu
+Auditor có tệp báo cáo pháp lý được ký số, sẵn sàng nộp cho cơ quan quản lý.
+Luồng thay thế / Ngoại lệ
+Lỗi ký số: Hệ thống xuất tệp không ký số và cảnh báo người dùng.
+Dữ liệu quét không đủ: Hệ thống thông báo các phần thiếu thông tin trong báo cáo.
+User Stories liên quan
+LA04, LA05, LA07
+3.4. Actor 4 — System Administrator (Quản trị viên hệ thống)
+3.4.1. Mô tả Actor
+System Administrator là người quản lý nền tảng VnComply ở cấp độ hệ thống. Actor này chịu trách nhiệm duy trì hoạt động liên tục của hệ thống, quản lý quyền truy cập người dùng, cập nhật bộ quy tắc pháp lý theo sự thay đổi của luật, điều khiển Scan Engine, và giám sát sức khỏe toàn bộ cơ sở hạ tầng.
+3.4.2. Quyền truy cập hệ thống
+Portal được phân công: /admin
+Dashboard giám sát (/admin/page.tsx): Tổng quan hệ thống với biểu đồ D3 CPU/RAM theo thời gian thực
+Quản lý quy tắc pháp lý (/admin/rules/page.tsx): CRUD bộ quy tắc ánh xạ vi phạm — điều khoản pháp luật
+Điều khiển Scan Engine (/admin/engine/page.tsx): Khởi động/dừng engine, xem console trạng thái
+Quản lý tài khoản (/admin/access/page.tsx): Tạo, sửa, khóa tài khoản người dùng theo vai trò
+Nhật ký kiểm toán hệ thống (/admin/logs/page.tsx): Nhật ký toàn bộ hoạt động hệ thống với bộ lọc
+Cấu hình hệ thống (/admin/settings/page.tsx): Thiết lập các tham số toàn cục của nền tảng
+3.4.3. User Stories
+ID
+Epic
+As a...
+I want to
+So that
+Ghi chú
+SA01
+System
+System Admin
+Login to admin console
+Tôi có thể truy cập toàn bộ giao diện quản trị hệ thống
+MFA bắt buộc cho tài khoản Admin
+SA02
+Rules
+System Admin
+Manage legal rules
+Tôi có thể thêm, sửa, xóa các quy tắc ánh xạ vi phạm với điều khoản pháp luật
+Phiên bản hóa (versioning) mỗi thay đổi
+SA03
+Rules
+System Admin
+Update law modules when new regulations are released
+Hệ thống luôn phản ánh khung pháp lý hiện hành mới nhất
+Áp dụng cho Nghị định 13 và Luật 91/2025
+SA04
+Engine
+System Admin
+Monitor scan engine health
+Tôi có thể phát hiện và xử lý sự cố quét trước khi ảnh hưởng đến người dùng
+Dashboard thời gian thực
+SA05
+Access
+System Admin
+Manage user accounts and roles
+Tôi có thể kiểm soát ai có quyền truy cập vào hệ thống và với mức độ nào
+RBAC: Admin, Business, Auditor, User
+SA06
+Monitor
+System Admin
+View system health metrics
+Tôi có thể giám sát hiệu suất hệ thống (CPU, RAM, số lượng scan)
+Biểu đồ D3.js thời gian thực
+SA07
+Audit
+System Admin
+View and filter system audit logs
+Tôi có thể truy xuất lịch sử toàn bộ hoạt động hệ thống để điều tra sự cố
+Nhật ký bất biến, lưu 12+ tháng
+SA08
+Config
+System Admin
+Configure global system settings
+Tôi có thể điều chỉnh các tham số hoạt động của toàn bộ nền tảng
+3.4.4. Use Cases chi tiết
+UC-SA02 — Cập nhật bộ quy tắc pháp lý (Update Legal Rules)
+Actor
+System Administrator
+Mô tả
+System Admin cập nhật bộ quy tắc ánh xạ vi phạm kỹ thuật với các điều khoản pháp luật cụ thể khi có sự thay đổi trong các văn bản pháp lý (Nghị định 13/2023, Luật 91/2025) hoặc khi phát hiện ánh xạ không chính xác.
+Điều kiện tiên quyết
+System Admin đã đăng nhập với vai trò Admin. Văn bản pháp lý mới hoặc đã sửa đổi đã được công bố chính thức.
+Luồng chính
+Bước 1: System Admin điều hướng đến /admin/rules.
+Bước 2: Admin xem danh sách quy tắc hiện có, bao gồm mã điều khoản, nội dung vi phạm, và mức độ nghiêm trọng.
+Bước 3: Admin chọn "Add Rule" hoặc chọn quy tắc hiện có để chỉnh sửa.
+Bước 4: Admin nhập: mã điều khoản pháp luật (vd: Điều 17, Nghị định 13), mô tả kỹ thuật của vi phạm, mức độ nghiêm trọng (Low/Medium/High), và hướng dẫn khắc phục.
+Bước 5: Hệ thống tạo bản phiên bản (version) mới của quy tắc và lưu lịch sử thay đổi.
+Bước 6: Admin xác nhận xuất bản. Quy tắc mới có hiệu lực cho tất cả các lượt quét tiếp theo.
+Bước 7: Hệ thống ghi nhật ký thay đổi vào Audit Logs (SA07) với thông tin: người thay đổi, thời gian, nội dung trước và sau khi sửa.
+Điều kiện hậu
+Bộ quy tắc pháp lý được cập nhật. Các lượt quét mới sẽ áp dụng quy tắc mới. Lịch sử thay đổi được lưu trữ và có thể truy xuất.
+Luồng thay thế / Ngoại lệ
+Quy tắc mới xung đột với quy tắc hiện có: Hệ thống cảnh báo và yêu cầu Admin giải quyết xung đột trước khi lưu.
+Admin hủy giữa chừng: Hệ thống loại bỏ thay đổi chưa lưu, bộ quy tắc không bị ảnh hưởng.
+User Stories liên quan
+SA02, SA03, SA07
+UC-SA04 — Giám sát và điều khiển Scan Engine
+Actor
+System Administrator
+Mô tả
+System Admin theo dõi trạng thái hoạt động của Scan Engine theo thời gian thực, can thiệp khi phát hiện sự cố, và đảm bảo năng lực xử lý đủ phục vụ tất cả người dùng đồng thời.
+Điều kiện tiên quyết
+System Admin đã đăng nhập. Hệ thống đang hoạt động ở trạng thái bình thường hoặc có cảnh báo.
+Luồng chính
+Bước 1: System Admin điều hướng đến /admin/engine.
+Bước 2: Hệ thống hiển thị bảng điều khiển Engine gồm: trạng thái (Running/Idle/Error), số lượng scan đang xử lý, hàng chờ (queue), và console log thời gian thực.
+Bước 3: Admin theo dõi chỉ số CPU và RAM trên dashboard /admin qua biểu đồ D3.js.
+Bước 4: Nếu phát hiện sự cố, Admin có thể: Restart Engine, tạm dừng hàng chờ mới, hoặc điều chỉnh giới hạn tài nguyên.
+Bước 5: Hệ thống ghi lại toàn bộ hành động Admin vào Audit Logs.
+Điều kiện hậu
+Scan Engine hoạt động ổn định. Mọi can thiệp của Admin được ghi lại trong nhật ký.
+Luồng thay thế / Ngoại lệ
+Engine lỗi nghiêm trọng: Hệ thống tự động gửi cảnh báo email đến Admin và tạm dừng nhận yêu cầu quét mới.
+User Stories liên quan
+SA04, SA06, SA07
+3.5. Actor 5 — Legal & Compliance Officers (Cán bộ Pháp lý & Tuân thủ)
+3.5.1. Mô tả Actor
+Legal & Compliance Officers là cầu nối giữa kết quả kỹ thuật và yêu cầu pháp lý trong nội bộ tổ chức. Đây là nhóm người dùng chuyên môn pháp lý, không nhất thiết có nền tảng kỹ thuật, nhưng cần diễn giải kết quả của hệ thống thành văn bản chính thức, hồ sơ nội bộ và đảm bảo tổ chức đáp ứng đầy đủ tất cả các yêu cầu pháp lý theo Nghị định 13/2023 và Luật 91/2025/QH15.
+Trong cấu trúc hệ thống VnComply, Legal & Compliance Officers truy cập hệ thống thông qua Business Enterprise Portal (/business) nhưng tập trung vào các chức năng kết xuất tài liệu pháp lý, xem ánh xạ điều khoản, và quản lý quy trình DPIA.
+3.5.2. Trách nhiệm và phạm vi tương tác
+Chuyển đổi kết quả quét của hệ thống thành hồ sơ pháp lý chính thức phục vụ cơ quan quản lý nhà nước.
+Đảm bảo tổ chức đáp ứng tất cả tiêu chí tuân thủ theo quy định pháp luật hiện hành.
+Phối hợp với Technical Team để ưu tiên khắc phục vi phạm theo mức độ rủi ro pháp lý.
+Duy trì hồ sơ bằng chứng "due diligence" để bảo vệ tổ chức trong trường hợp bị thanh tra.
+3.5.3. User Stories
+ID
+Epic
+As a...
+I want to
+So that
+Ghi chú
+LC01
+Legal
+Legal & Compliance Officer
+View law article mapping for each violation
+Tôi có thể xác định chính xác điều khoản pháp luật nào đang bị vi phạm để soạn thảo hồ sơ khắc phục
+Liên kết đến PB08
+LC02
+Compliance
+Legal & Compliance Officer
+Initiate and complete DPIA assessment
+Tôi có thể hoàn thành nghĩa vụ đánh giá tác động dữ liệu theo yêu cầu của Nghị định 13
+Liên kết đến PB03, PB10
+LC03
+Reporting
+Legal & Compliance Officer
+Generate official compliance documentation
+Tôi có tài liệu pháp lý chính thức phản ánh trạng thái tuân thủ của tổ chức
+Liên kết đến PB02, PB11
+LC04
+Audit
+Legal & Compliance Officer
+Access audit evidence logs
+Tôi có thể chứng minh sự cẩn trọng của tổ chức trong bất kỳ cuộc thanh tra nào
+Liên kết đến PB12
+4. YÊU CẦU PHI CHỨC NĂNG
+Thuộc tính
+Yêu cầu cụ thể
+Tiêu chí đo lường
+Hiệu năng (Performance)
+Thời gian tải trang dưới 2 giây. Hoàn tất quét trong vòng 45 giây.
+Page Load < 2s; Scan Time < 45s
+Khả năng mở rộng (Scalability)
+Xử lý nhiều yêu cầu đồng thời và mở rộng không gián đoạn khi lưu lượng tăng.
+Horizontal scaling; Queue-based engine
+Bảo mật dữ liệu (Security)
+Mã hóa dữ liệu trong lưu chuyển và khi lưu trữ. Không lưu dữ liệu cá nhân nhạy cảm trong quá trình quét.
+TLS 1.3; AES-256; Zero-PII scanning
+Độ tin cậy (Reliability)
+Đảm bảo 99.9% uptime. Kế hoạch khôi phục dịch vụ trong vòng dưới 1 giờ.
+Uptime 99.9%; RTO < 1 giờ
+Đa ngôn ngữ (i18n)
+Toàn bộ giao diện và báo cáo khả dụng đầy đủ bằng tiếng Việt và tiếng Anh.
+vi-VN + en-US đầy đủ
+Sao lưu (Backup)
+Sao lưu dữ liệu hàng ngày. Nhật ký và báo cáo luôn sẵn sàng cho thanh tra.
+Daily backup; RPO < 24h
+Xác thực (Authentication)
+Đăng nhập đa yếu tố (MFA) bắt buộc cho tài khoản Business và Admin. Hết phiên sau 30 phút không hoạt động.
+MFA; Session timeout 30 phút
+5. SƠ ĐỒ NGỮCẢNH HỆ THỐNG (SYSTEM CONTEXT)
+Dưới đây tóm tắt luồng tương tác giữa các actor và hệ thống VnComply theo mô tả trong tài liệu đề xuất chính thức:
+Actor
+Gửi vào hệ thống
+Nhận từ hệ thống
+Individual User
+URL để quét nhanh hoặc đầy đủ; yêu cầu xem lịch sử
+Kết quả kiểm tra consent, cookie tracker detection, báo cáo tuân thủ cơ bản
+Businesses & Organizations
+Đăng nhập dashboard, cấu hình chính sách quét, lịch tự động, cảnh báo, yêu cầu hỗ trợ DPIA
+Ánh xạ điều khoản pháp luật, nhật ký bằng chứng kiểm toán, dữ liệu hỗ trợ DPIA, báo cáo PDF tuân thủ, phân tích vi phạm, điểm tuân thủ
+Law Firms & Auditors
+Quản lý nhiều khách hàng, quét khách hàng, so sánh khách hàng, yêu cầu báo cáo pháp lý
+Tóm tắt vi phạm khách hàng, kết quả pháp lý theo điều khoản, đánh giá rủi ro, báo cáo sẵn sàng kiểm toán
+System Admin
+Đăng nhập console quản trị, quản lý quy tắc pháp lý, cập nhật module luật, giám sát hệ thống
+Trạng thái cập nhật quy tắc, chỉ số hệ thống, trạng thái Scan Engine
+Legal & Compliance Officers
+Truy xuất ánh xạ điều khoản, khởi tạo DPIA, yêu cầu tài liệu pháp lý chính thức
+Tài liệu pháp lý chính thức, nhật ký bằng chứng, dữ liệu hỗ trợ DPIA
+6. NGUỒN TÀI LIỆU VÀ GHI CHÚ PHÂN TÍCH
+6.1. Tài liệu nguồn được sử dụng
+Tài liệu
+Nội dung sử dụng
+Proposal_nhom1.docx (v2.0 — 01/02/2026)
+Problem statement, objectives, scope, key features, functional & non-functional requirements, target users, system context diagram, availability requirements
+Google Sheets — User Stories (gid=886704201)
+User Stories PB01–PB12 cho Businesses & Organizations: ID, Epic, As a / I want to / So that, Acceptance Criteria, Remarks
+GitHub — dyltran3/VnComplyDemo
+Cấu trúc thư mục và tên trang thực tế, technology stack, 4 portal routes, demo account roles, README kỹ thuật
+Notion — NHOM1 (335dd7a9...)
+Trang Notion yêu cầu JavaScript để tải nên không thể trích xuất tự động. Nội dung từ nguồn này được bổ sung qua các tài liệu còn lại.
+6.2. Ghi chú về phạm vi phân tích
+User Stories cho các actor Individual User, Law Firms & Auditors, và System Administrator được tổng hợp từ tài liệu Proposal (phần Target Users và System Context) kết hợp cấu trúc trang thực tế từ GitHub repository, do sheet tương ứng trong Google Sheets không được cung cấp trong URL phân tích.
+Tất cả Use Cases chi tiết được xây dựng trực tiếp từ Acceptance Criteria và Remarks trong User Stories, cùng với mô tả kỹ thuật trong Proposal. Không có nội dung suy diễn ngoài phạm vi tài liệu gốc.
+Ánh xạ điều khoản pháp luật trong các use cases sử dụng tên văn bản pháp luật chính thức: Nghị định 13/2023/NĐ-CP (hiện hành) và Luật Bảo vệ Dữ liệu Cá nhân số 91/2025/QH15 (mới ban hành).
+Cấu trúc portal và tên route (/admin, /user, /auditor, /business) xác nhận từ mã nguồn thực tế trong repository GitHub, không phải từ đặc tả.
