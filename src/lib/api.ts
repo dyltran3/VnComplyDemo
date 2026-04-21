@@ -99,6 +99,63 @@ class ApiClient {
   async getScanFindings(scanId: string) {
     return this.request(`/api/scans/${scanId}/findings`);
   }
+
+  // --- Admin ---
+  async getSystemMetrics() {
+    return this.request("/api/admin/metrics");
+  }
+
+  async listLegalRules() {
+    return this.request("/api/admin/rules");
+  }
+
+  async createLegalRule(rule: { law_ref: string, category: string, description: string, severity: string, remediation?: string }) {
+    return this.request("/api/admin/rules", {
+      method: "POST",
+      body: JSON.stringify(rule),
+    });
+  }
+
+  async deleteLegalRule(ruleId: string) {
+    return this.request(`/api/admin/rules/${ruleId}`, {
+      method: "DELETE",
+    });
+  }
+
+  // --- Business ---
+  async saveDPIA(data: any) {
+    return this.request("/api/business/dpia", {
+      method: "POST",
+      body: JSON.stringify(data),
+    });
+  }
+
+  async listDPIAs() {
+    return this.request("/api/business/dpia");
+  }
+
+  async createSchedule(data: { target_url: string, frequency: string }) {
+    return this.request("/api/business/schedules", {
+      method: "POST",
+      body: JSON.stringify(data),
+    });
+  }
+
+  async listSchedules() {
+    return this.request("/api/business/schedules");
+  }
+
+  // --- Logs ---
+  async getAuditLogs() {
+    return this.request("/api/admin/logs");
+  }
+
+  // Alias for clarity
+  async listUserScans() {
+    return this.listScans();
+  }
 }
+
+
 
 export const api = new ApiClient();
