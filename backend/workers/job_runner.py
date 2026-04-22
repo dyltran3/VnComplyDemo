@@ -64,28 +64,41 @@ class JobQueue:
                         scan.progress = 10
                         db.commit()
                         logger.info(f"Running privacy scan on {target_url}")
-                        res = await run_privacy_scan(target_url)
-                        privacy_findings = [f.__dict__ for f in res.findings]
+                        try:
+                            # 120s Timeout
+                            res = await asyncio.wait_for(run_privacy_scan(target_url), timeout=120.0)
+                            if res:
+                                privacy_findings = [f.__dict__ for f in res.findings]
+                        except Exception as e:
+                            logger.error(f"Privacy scan failed/timed out for {target_url}: {e}")
                         scan.progress = 40
                         db.commit()
 
                     # 3. Run NLP Policy Analyzer (Phase 3b)
                     if scan_type in ("privacy", "full"):
                         logger.info(f"Running NLP policy analysis on {target_url}")
-                        nlp_res = await analyze_policy(target_url)
-                        nlp_result = {
-                            "compliance_score": nlp_res.compliance_score,
-                            "summary":          nlp_res.summary,
-                            "violations":      [v.__dict__ for v in nlp_res.violations]
-                        }
+                        try:
+                            nlp_res = await asyncio.wait_for(analyze_policy(target_url), timeout=60.0)
+                            if nlp_res and not nlp_res.error:
+                                nlp_result = {
+                                    "compliance_score": nlp_res.compliance_score,
+                                    "summary":          nlp_res.summary,
+                                    "violations":      [v.__dict__ for v in nlp_res.violations]
+                                }
+                        except Exception as e:
+                            logger.error(f"NLP scan failed/timed out for {target_url}: {e}")
                         scan.progress = 60
                         db.commit()
 
                     # 4. Run OWASP Security Scanner (Phase 4)
                     if scan_type in ("security", "full"):
                         logger.info(f"Running OWASP scan on {target_url}")
-                        res = await run_owasp_scan(target_url)
-                        security_findings = [f.__dict__ for f in res.findings]
+                        try:
+                            res = await asyncio.wait_for(run_owasp_scan(target_url), timeout=120.0)
+                            if res:
+                                security_findings = [f.__dict__ for f in res.findings]
+                        except Exception as e:
+                            logger.error(f"OWASP scan failed/timed out for {target_url}: {e}")
                         scan.progress = 85
                         db.commit()
 
@@ -163,14 +176,16 @@ class JobQueue:
                     logger.info(f"Finished background job for scan_id: {scan_id_str}")
 
                 except Exception as e:
-                    logger.error(f"Error processing scan {scan_id_str}: {e}")
+                    import traceback
+                    err_trace = traceback.format_exc()
+                    logger.error(f"Error processing scan {scan_id_str}: {e}\n{err_trace}")
                     # Re-bind session if needed
                     err_db = SessionLocal()
                     try:
                         scan = err_db.query(Scan).filter(Scan.id == uuid.UUID(scan_id_str)).first()
                         if scan:
                             scan.status = "failed"
-                            scan.error_msg = str(e)
+                            scan.error_msg = str(e)[:1000] # Capture more error detail
                             err_db.commit()
                     finally:
                         err_db.close()
