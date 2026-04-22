@@ -1,0 +1,23 @@
+version: '3.8'
+services:
+  backend:
+    build: ./backend
+    ports:
+      - '8000:8000'
+    env_file:
+      - .env
+    environment:
+      - SUPABASE_DB_URL=${SUPABASE_DB_URL}
+      - JWT_SECRET=${JWT_SECRET}
+  frontend:
+    build: .
+    ports:
+      - '3000:3000'
+  target-backend:
+    build: ./target/backend
+    ports:
+      - '8001:8000'
+  target-frontend:
+    build: ./target/frontend
+    ports:
+      - '3001:3000'

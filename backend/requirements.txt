@@ -1,0 +1,13 @@
+fastapi
+uvicorn
+python-multipart
+SQLAlchemy
+psycopg2-binary
+python-dotenv
+playwright
+httpx
+jinja2
+weasyprint
+passlib[bcrypt]
+PyJWT
+psutil

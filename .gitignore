@@ -34,13 +34,20 @@ next-env.d.ts
 skills-lock.json
 
 # ─────────────────────────────────────────────
-# Backend / Infra (separate deployment)
+# Backend / Infra (UN-IGNORED for portability)
 # ─────────────────────────────────────────────
-backend/
-target/
-docker-compose.yml
-extract.py
-frontend/
+# /backend/ <-- Removed from ignore
+# docker-compose.yml <-- Removed from ignore
+# extract.py <-- Removed from ignore
+# frontend/ <-- Removed from ignore
+
+# Specific Backend Ignores
+backend/__pycache__/
+backend/venv/
+backend/.venv/
+backend/reports/
+*.db
+vncomply.db
 
 # ─────────────────────────────────────────────
 # Testing & Coverage
