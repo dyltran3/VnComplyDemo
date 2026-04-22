@@ -10,4 +10,6 @@ jinja2
 weasyprint
 passlib[bcrypt]
 PyJWT
+python-jose[cryptography]
+beautifulsoup4
 psutil

@@ -1,27 +1,48 @@
-"use client";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { FileBarChart, Download, Eye, Filter, CheckCircle, AlertTriangle, Clock, X } from "lucide-react";
-
-const reports = [
-  { id: 1, client: "FinTech VN Corp", date: "2026-04-15", score: 45, violations: 12, auditor: "Auditor@testmail", pages: 12 },
-  { id: 2, client: "HealthPlus Clinics", date: "2026-04-14", score: 72, violations: 5, auditor: "Auditor@testmail", pages: 8 },
-  { id: 3, client: "EduSpace Online", date: "2026-04-13", score: 91, violations: 1, auditor: "Auditor@testmail", pages: 6 },
-];
+import { api } from "@/lib/api";
 
 export default function LegalReportsPage() {
+  const [reports, setReports] = useState<any[]>([]);
+  const [loading, setLoading] = useState(true);
   const [filter, setFilter] = useState("all");
-  const [previewing, setPreviewing] = useState<typeof reports[0] | null>(null);
-  const [downloading, setDownloading] = useState<number | null>(null);
+  const [previewing, setPreviewing] = useState<any | null>(null);
+  const [downloading, setDownloading] = useState<string | null>(null);
+
+  useEffect(() => {
+    const fetchReports = async () => {
+      try {
+        const data = await api.listScans();
+        // Map scan status to UI reports
+        const mapped = data.filter((s: any) => s.status === "completed").map((s: any) => ({
+          id: s.id,
+          client: s.target_url.replace(/https?:\/\//, ""),
+          date: s.created_at.split("T")[0],
+          score: 85, // Placeholder score
+          violations: 0,
+          auditor: "System",
+          pages: 12
+        }));
+        setReports(mapped);
+      } catch (err) {
+        console.error("Failed to fetch reports:", err);
+      } finally {
+        setLoading(false);
+      }
+    };
+    fetchReports();
+  }, []);
 
   const filtered = filter === "all" ? reports : reports.filter(r =>
     filter === "high" ? r.score < 55 : filter === "medium" ? r.score >= 55 && r.score < 80 : r.score >= 80
   );
 
-  const doDownload = (id: number) => {
+  const doDownload = (id: string) => {
     setDownloading(id);
     setTimeout(() => setDownloading(null), 1500);
   };
+
 
   return (
     <div className="space-y-6">

@@ -11,7 +11,7 @@ import uuid, datetime
 
 from database.connection import get_db
 from database.models import Scan, Finding, User
-from workers.job_runner import job_queue
+from api.auth import get_current_user
 
 router = APIRouter(prefix="/api/scans", tags=["scans"])
 
@@ -43,12 +43,13 @@ async def create_scan(
     body: ScanCreate,
     background_tasks: BackgroundTasks,
     db: Session = Depends(get_db),
-    # TODO: add current_user: User = Depends(get_current_user) after auth middleware done
+    current_user: User = Depends(get_current_user)
 ):
     """Submit a new scan job."""
     scan = Scan(
         target_url=body.target_url,
         scan_type=body.scan_type,
+        user_id=current_user.id,
         status="pending",
         progress=0,
     )
@@ -70,9 +71,16 @@ async def create_scan(
 
 
 @router.get("", response_model=list[ScanResponse])
-def list_scans(db: Session = Depends(get_db)):
-    """List all scans (TODO: filter by current_user)."""
-    scans = db.query(Scan).order_by(Scan.created_at.desc()).limit(50).all()
+def list_scans(
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_user)
+):
+    """List all scans for the current user."""
+    scans = db.query(Scan)\
+        .filter(Scan.user_id == current_user.id)\
+        .order_by(Scan.created_at.desc())\
+        .limit(50).all()
+
     return [
         ScanResponse(
             id=str(s.id),

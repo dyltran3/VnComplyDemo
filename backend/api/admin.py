@@ -11,14 +11,16 @@ router = APIRouter(prefix="/api/admin", tags=["admin"])
 
 # --- System Metrics ---
 @router.get("/metrics")
-async def get_system_metrics():
+async def get_system_metrics(db: Session = Depends(get_db)):
     """Real-time system health metrics."""
+    active_count = db.query(Scan).filter(Scan.status.in_(["pending", "running"])).count()
+    
     return {
         "cpu": psutil.cpu_percent(),
         "ram": psutil.virtual_memory().percent,
         "disk": psutil.disk_usage('/').percent,
-        "engine_status": "running",
-        "active_jobs": 42, # Mock or count from DB
+        "engine_status": "active" if psutil.cpu_percent() < 90 else "bottlenecked",
+        "active_jobs": active_count,
         "timestamp": datetime.datetime.now().isoformat()
     }
 
