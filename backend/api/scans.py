@@ -11,7 +11,7 @@ import uuid, datetime
 
 from database.connection import get_db
 from database.models import Scan, Finding, User
-from api.auth import get_current_user
+from api.auth import get_current_user, get_current_user_optional
 
 router = APIRouter(prefix="/api/scans", tags=["scans"])
 
@@ -43,13 +43,14 @@ async def create_scan(
     body: ScanCreate,
     background_tasks: BackgroundTasks,
     db: Session = Depends(get_db),
-    current_user: User = Depends(get_current_user)
+    current_user: User = Depends(get_current_user_optional)
 ):
     """Submit a new scan job."""
+    user_id_val = current_user.id if current_user else None
     scan = Scan(
         target_url=body.target_url,
         scan_type=body.scan_type,
-        user_id=current_user.id,
+        user_id=user_id_val,
         status="pending",
         progress=0,
     )
@@ -73,13 +74,13 @@ async def create_scan(
 @router.get("", response_model=list[ScanResponse])
 def list_scans(
     db: Session = Depends(get_db),
-    current_user: User = Depends(get_current_user)
+    current_user: User = Depends(get_current_user_optional)
 ):
     """List all scans for the current user."""
-    scans = db.query(Scan)\
-        .filter(Scan.user_id == current_user.id)\
-        .order_by(Scan.created_at.desc())\
-        .limit(50).all()
+    query = db.query(Scan)
+    if current_user:
+        query = query.filter(Scan.user_id == current_user.id)
+    scans = query.order_by(Scan.created_at.desc()).limit(50).all()
 
     return [
         ScanResponse(
