@@ -79,20 +79,19 @@ NEXT_PUBLIC_API_URL=http://localhost:8000
 
 ---
 
-## 🚦 Khởi chạy hệ thống
+## 🚦 Khởi chạy hệ thống (Single Command)
 
-Hệ thống yêu cầu chạy song song cả Backend và Frontend:
+VnComply hiện đã hỗ trợ khởi chạy toàn bộ hệ thống (Frontend & Backend) chỉ với một lệnh duy nhất:
 
-**Terminal 1 (Backend):**
 ```bash
-cd backend
-uvicorn main:app --reload --port 8000
-```
-
-**Terminal 2 (Frontend):**
-```bash
+# Tại thư mục gốc dự án
 npm run dev
 ```
+
+Hệ thống sẽ tự động bật:
+- **Frontend**: Next.js tại [http://localhost:3000](http://localhost:3000)
+- **Backend**: FastAPI tại [http://localhost:8000](http://localhost:8000)
+
 
 Truy cập: [http://localhost:3000](http://localhost:3000)
 
